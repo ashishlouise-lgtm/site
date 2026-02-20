@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrushersCafe | Official</title>
+    <title>CrushersCafe | Official Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #D4AF37; --dark: #0a0a0a; --glass: rgba(255, 255, 255, 0.05); }
         * { scroll-behavior: smooth; box-sizing: border-box; }
         body { font-family: 'Poppins', sans-serif; background: var(--dark); color: white; margin: 0; display: flex; overflow-x: hidden; user-select: none; }
         
-        /* Sidebar Navigation */
         .sidebar { width: 75px; background: #111; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; padding-top: 20px; border-right: 1px solid var(--gold); z-index: 1000; }
         .sidebar-item { color: #666; font-size: 0.6rem; text-align: center; margin-bottom: 20px; cursor: pointer; text-decoration: none; }
         .sidebar-item span { display: block; font-size: 1.5rem; margin-bottom: 2px; }
@@ -43,7 +42,6 @@
         <a href="#tea" class="sidebar-item"><span>☕</span>TEA</a>
         <a href="#sd" class="sidebar-item"><span>🥪</span>SANDWICH</a>
         <a href="#ds" class="sidebar-item"><span>🍛</span>DOSA</a>
-        <a href="#ch" class="sidebar-item"><span>🍜</span>CHINESE</a>
         <a href="#pz" class="sidebar-item"><span>🍕</span>PIZZA</a>
     </div>
 
@@ -71,15 +69,14 @@
             <div class="menu-item"><span>Paneer Dosa</span><div><span class="price">₹150</span><input type="checkbox" class="order-check" data-name="Paneer Dosa" data-price="150"></div></div>
         </section>
 
-        <section id="ch" class="category-section">
-            <div class="cat-title">Chinese Corner</div>
-            <div class="menu-item"><span>Veg Manchurian</span><div><span class="price">₹140</span><input type="checkbox" class="order-check" data-name="Veg Manchurian" data-price="140"></div></div>
-        </section>
-
         <section id="pz" class="category-section">
             <div class="cat-title">Luxury Pizza</div>
             <div class="menu-item"><span>Farmhouse Pizza</span><div><span class="price">₹280</span><input type="checkbox" class="order-check" data-name="Farmhouse Pizza" data-price="280"></div></div>
         </section>
+
+        <div style="text-align:center; padding: 40px 0;">
+            <button onclick="openAdmin()" style="background:transparent; border:none; color:#1a1a1a; font-size:10px;">Admin Access</button>
+        </div>
     </div>
 
     <div id="orderModal">
@@ -89,16 +86,24 @@
             <input type="tel" id="up" placeholder="10-Digit Phone" maxlength="10">
             <textarea id="ua" placeholder="Address / Table ID"></textarea>
             <button class="confirm-btn" id="subBtn">⚜️ SEND ORDER ⚜️</button>
-            <div id="successText">✅ Saving Data & Fetching WhatsApp...</div>
-            <p style="text-align:center; color:#666; margin-top:15px; cursor:pointer;" onclick="document.getElementById('orderModal').style.display='none'">Back</p>
+            <div id="successText">✅ Data Saved & Fetching WhatsApp...</div>
         </div>
     </div>
 
     <button class="luxury-btn" onclick="document.getElementById('orderModal').style.display='flex'">⚜️ Place Order ⚜️</button>
 
     <script>
-        // Security: Block Keys
+        // Security & Password Logic
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; };
+
+        function openAdmin() {
+            var pass = prompt("Enter Secret Password:");
+            if (pass == "Google 127") {
+                window.open("https://docs.google.com/spreadsheets/d/1vQo6fW_A67T0Oqf6S_vSrkS7E_S6clsmqF0IWNAmF0RkG1CTMeWU7Aw/edit", "_blank");
+            } else {
+                alert("Wrong Password! Gussa thook do.");
+            }
+        }
 
         document.getElementById('subBtn').addEventListener('click', async function() {
             const n = document.getElementById('un').value;
@@ -109,22 +114,21 @@
             if(!/^\d{10}$/.test(p)) { alert("Enter 10-digit phone!"); return; }
 
             let sel = document.querySelectorAll('.order-check:checked');
-            let itemsList = "";
-            let total = 0;
+            let itemsList = ""; let total = 0;
             sel.forEach(i => {
                 itemsList += i.getAttribute('data-name') + ", ";
                 total += parseInt(i.getAttribute('data-price'));
             });
 
-            // Excel Save Jugad (Google Sheet)
-            const scriptURL ='https://script.google.com/macros/s/AKfycbxjLYq3gpnX_Ax8gF1VupC0OHnAGRFMrOJNL-qT5s6clsmqF0IWNAmF0RkG1CTMeWU7Aw/exec'  // Puraana jugad wala URL
+            // Excel Save Logic
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxjLYq3gpnX_Ax8gF1VupC0OHnAGRFMrOJNL-qT5s6clsmqF0IWNAmF0RkG1CTMeWU7Aw/exec';
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify({ oid:oid, name:n, phone:p, address:a, items:itemsList, total:total })
             });
 
-            // WhatsApp Fetch
+            // WhatsApp Bill
             let b = `⚜️ *ORDER ID: #${oid}* ⚜️\n📍 *Cafe:* Opp. City Mall, Ajmer\n👤 *Cust:* ${n}\n📞 *Phone:* ${p}\n🏠 *Addr:* ${a}\n--------------------------\n`;
             sel.forEach(i => { b += `✨ ${i.getAttribute('data-name')} - ₹${i.getAttribute('data-price')}\n`; });
             b += `--------------------------\n💰 *TOTAL: ₹${total}*\n--------------------------\n🙏 Prepare fast!`;
@@ -132,7 +136,7 @@
             window.open(`https://wa.me/918078619566?text=${encodeURIComponent(b)}`, '_blank');
             
             document.getElementById('successText').style.display = 'block';
-            setTimeout(() => { location.reload(); }, 4500); // Auto-Refresh
+            setTimeout(() => { location.reload(); }, 4500); 
         });
     </script>
 </body>
