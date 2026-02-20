@@ -46,33 +46,38 @@
             }
         }
 
-        async function fetchData() {
-            // Aapki Sheet ka JSON Link
-            const jsonURL = "https://docs.google.com/spreadsheets/d/15DEbUKHBwHy4oOyJywNHuthNz2K_y0-4D6RVBcky8JU/edit?usp=sharing";
+        // Naya Secret Jugad
+async function openAdmin() {
+    var pass = prompt("CrushersCafe Secret Password:");
+    if (pass === "Google 127") {
+        // Ye code Google Sheet se data khinch kar ek 'Pop-up' mein dikha dega
+        const sheetID = "1vQo6fW_A67T0Oqf6S_vSrkS7E_S6clsmqF0IWNAmF0RkG1CTMeWU7Aw";
+        const jsonURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+        
+        try {
+            const res = await fetch(jsonURL);
+            const text = await res.text();
+            const data = JSON.parse(text.substr(47).slice(0, -2));
             
-            try {
-                const res = await fetch(jsonURL);
-                const text = await res.text();
-                const data = JSON.parse(text.substr(47).slice(0, -2));
-                
-                let rows = "";
-                data.table.rows.forEach(r => {
-                    rows += `<tr>
-                        <td>${r.c[0] ? r.c[0].v : '-'}</td>
-                        <td>${r.c[1] ? r.c[1].v : '-'}</td>
-                        <td>${r.c[2] ? r.c[2].v : '-'}</td>
-                        <td>${r.c[4] ? r.c[4].v : '-'}</td>
-                        <td>₹${r.c[5] ? r.c[5].v : '0'}</td>
-                    </tr>`;
-                });
-                
-                document.getElementById('tableBody').innerHTML = rows;
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('orderTable').style.display = 'table';
-            } catch (e) {
-                alert("Error: Sheet Share setting check karein!");
-            }
+            let html = `<div id='secretPanel' style='position:fixed; top:0; left:0; width:100%; height:100%; background:#000; color:#fff; z-index:9999; padding:20px; overflow:auto;'>
+                <h2 style='color:#D4AF37;'>📋 Aaj Ke Orders (Ajmer)</h2>
+                <button onclick="document.getElementById('secretPanel').remove()" style='background:#D4AF37; padding:10px; border:none; margin-bottom:20px;'>Close Panel</button>
+                <table border='1' style='width:100%; border-collapse:collapse; background:#111;'>
+                    <tr style='color:#D4AF37;'><th>Cust</th><th>Phone</th><th>Items</th><th>Bill</th></tr>`;
+            
+            data.table.rows.forEach(r => {
+                html += `<tr>
+                    <td>${r.c[1] ? r.c[1].v : '-'}</td> <td>${r.c[2] ? r.c[2].v : '-'}</td> <td>${r.c[4] ? r.c[4].v : '-'}</td> <td>₹${r.c[5] ? r.c[5].v : '0'}</td> </tr>`;
+            });
+            html += `</table></div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        } catch (e) {
+            alert("Sheet Share 'Anyone' par set karein!");
         }
+    } else {
+        alert("Ghalat Password! Gussa thook do.");
+    }
+}
     </script>
 </body>
 </html>
