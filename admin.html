@@ -1,30 +1,57 @@
- function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
+<div id="secureLayer" style="display:none;">
+    <div id="adminTableContainer" style="background:#111; padding:20px; border:2px solid #D4AF37; margin:20px; border-radius:10px; position:fixed; top:10%; left:5%; right:5%; z-index:9999; max-height:80vh; overflow-y:auto;">
+        <h3 style="color:#D4AF37; text-align:center;">📋 CrushersCafe Live Orders</h3>
+        <table style="width:100%; color:white; border-collapse:collapse; font-size:0.8rem;">
+            <thead>
+                <tr style="background:#222; color:#D4AF37;">
+                    <th style="padding:8px; border:1px solid #444;">OID</th>
+                    <th style="padding:8px; border:1px solid #444;">Name</th>
+                    <th style="padding:8px; border:1px solid #444;">Phone</th>
+                    <th style="padding:8px; border:1px solid #444;">Total</th>
+                </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+        <button onclick="closeAdmin()" style="width:100%; background:#D4AF37; color:black; padding:10px; margin-top:15px; border:none; border-radius:5px; font-weight:bold;">Logout & Lock</button>
+    </div>
+</div>
+
+<script>
+async function openAdmin() {
+    // 1. Password Check
+    var pass = prompt("Access Denied! Enter Admin Key:");
     
-    // Email par table banane ka jugad
-    var emailBody = `
-      <h2 style="color: #D4AF37;">⚜️ Naya Order: ${data.oid} ⚜️</h2>
-      <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial;">
-        <tr style="background-color: #f2f2f2;"><th>Detail</th><th>Information</th></tr>
-        <tr><td><b>Customer Name</b></td><td>${data.name}</td></tr>
-        <tr><td><b>Phone Number</b></td><td>${data.phone}</td></tr>
-        <tr><td><b>Ajmer Address</b></td><td>${data.address}</td></tr>
-        <tr><td><b>Items Ordered</b></td><td>${data.items}</td></tr>
-        <tr><td style="color: green;"><b>Total Bill</b></td><td><b>₹${data.total}</b></td></tr>
-      </table>
-      <p><i>Order Time: ${new Date()}</i></p>
-    `;
-
-    // Apni Gmail par order bhejna
-    MailApp.sendEmail({
-      to: "Aapki-"crushescafe@gmail.com", // Yahan apni asli Gmail ID likhein
-      subject: "🔥 New Order from CrushersCafe - " + data.oid,
-      htmlBody: emailBody
-    });
-
-    return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
-  } catch (err) {
-    return ContentService.createTextOutput("Error").setMimeType(ContentService.MimeType.TEXT);
-  }
+    if (pass === "Google 127") {
+        // 2. Sirf sahi password par hi link aur table activate hogi
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbziiUkJh39aR_PvcN6PWPQRM1qzIMRpyb8wFB-r5FZQbRW1eB2tpa7dN1a924Ggupi5Rag/exec';
+        
+        try {
+            const res = await fetch(scriptURL.replace('/exec', '/gviz/tq?tqx=out:json'));
+            const text = await res.text();
+            const data = JSON.parse(text.substr(47).slice(0, -2));
+            
+            let rows = "";
+            data.table.rows.forEach(r => {
+                rows += `<tr style="border-bottom:1px solid #333;">
+                    <td style="padding:5px;">${r.c[0] ? r.c[0].v : '-'}</td>
+                    <td style="padding:5px;">${r.c[1] ? r.c[1].v : '-'}</td>
+                    <td style="padding:5px;">${r.c[2] ? r.c[2].v : '-'}</td>
+                    <td style="padding:5px;">₹${r.c[5] ? r.c[5].v : '0'}</td>
+                </tr>`;
+            });
+            
+            document.getElementById('adminTableBody').innerHTML = rows;
+            document.getElementById('secureLayer').style.display = 'block'; // Parda uthao
+        } catch (e) {
+            alert("Error 404: System Locked!");
+        }
+    } else {
+        alert("Invalid Access! Error 403: Forbidden.");
+    }
 }
+
+function closeAdmin() {
+    document.getElementById('secureLayer').style.display = 'none';
+    document.getElementById('adminTableBody').innerHTML = ''; // Data saaf kar do
+}
+</script>
