@@ -113,7 +113,12 @@
             const oid = "CRUSHESCAFE-" + Math.floor(1000 + Math.random() * 9000);
 
             if(!/^\d{10}$/.test(p)) { alert("Enter 10-digit phone!"); return; }
-
+            
+// Validation Logic
+if (itemsList === "" || total === 0) {
+    alert("Bhai, kuch toh chuno! Khali order nahi jayega.");
+    return; // Order yahi ruk jayega
+}
             let sel = document.querySelectorAll('.order-check:checked');
             let itemsList = ""; let total = 0;
             sel.forEach(i => {
