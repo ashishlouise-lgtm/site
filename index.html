@@ -88,7 +88,7 @@
 
     <script>
         const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; 
-        const myWhatsApp = "8078619566"; // Aapka number
+        const myWhatsApp = "918078619566"; // Aapka number
         let cart = {};
 
         function toggle(id) { document.getElementById(id).classList.toggle('open'); }
@@ -109,6 +109,9 @@
             if (total == "0") { alert("Bhai, khali order mat bhejo!"); return; }
 
             let name = prompt("Aapka Naam?");
+
+            let phone = prompt("Aapka Number?");
+            if (!phone || phone.length < 10) { alert("Sahi number dalo!"); return; }
             let items = "";
             for (let n in cart) { if (cart[n].qty > 0) items += n + " (x" + cart[n].qty + "), "; }
 
