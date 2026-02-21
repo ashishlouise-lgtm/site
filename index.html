@@ -3,94 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrushersCafe - Secure Order</title>
+    <title>CrushersCafe - Premium Order</title>
     <style>
-        :root { --gold: #D4AF37; --black: #000; --dark: #111; }
-        body { font-family: sans-serif; background: var(--black); color: white; padding: 15px; }
-        .category-header { background: var(--gold); color: black; padding: 15px; cursor: pointer; font-weight: bold; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; }
-        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: var(--dark); }
-        .category-content.open { max-height: 1000px; padding: 10px; border: 1px solid #333; }
-        .item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; }
-        .order-btn { width: 100%; padding: 18px; background: var(--gold); border: none; font-weight: bold; margin-top: 20px; border-radius: 8px; cursor: pointer; }
-        #secureLayer { display:none; position:fixed; top:5%; left:5%; right:5%; bottom:5%; background:var(--dark); border:2px solid var(--gold); padding:15px; z-index:9999; overflow-y:auto; border-radius:12px; }
+        :root { --gold: #D4AF37; --black: #050505; --card: #121212; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--black); color: white; margin: 0; padding: 15px; }
+        h2 { text-align: center; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-top: 20px; }
+        
+        /* Premium Category Header */
+        .category-header { 
+            background: linear-gradient(45deg, #D4AF37, #B8860B); color: black; 
+            padding: 15px; cursor: pointer; font-weight: bold; border-radius: 10px; 
+            margin-top: 15px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .category-content { 
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; 
+            background: var(--card); border-radius: 0 0 10px 10px;
+        }
+        .category-content.open { max-height: 1000px; padding: 10px; border: 1px solid #222; }
+        
+        /* Item Row with Quantity Selector */
+        .item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
+        .item-info { flex: 1; }
+        .item-name { font-size: 1.1rem; font-weight: 500; }
+        .item-price { color: var(--gold); font-size: 0.9rem; }
+        
+        .qty-controls { display: flex; align-items: center; background: #222; border-radius: 5px; padding: 5px; }
+        .qty-btn { background: var(--gold); color: black; border: none; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .qty-val { width: 35px; text-align: center; font-weight: bold; font-size: 1rem; }
+        
+        /* Bullet Proof Bottom Bar */
+        .order-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 15px; border-top: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
+        .total-info { font-size: 1.2rem; font-weight: bold; }
+        .order-btn { background: var(--gold); color: black; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h2 style="text-align:center; color:var(--gold);">⚜️ CRUSHERS CAFE ⚜️</h2>
+    <h2>⚜️ CrushersCafe ⚜️</h2>
+    <p style="text-align:center; color:#666; font-size:0.8rem;">Ajmer's Most Premium Taste</p>
 
-    <div class="category-header" onclick="toggleCategory('piz')">🍕 PIZZA <span>▼</span></div>
-    <div id="piz" class="category-content">
-        <div class="item"><span>Margherita</span> <input type="checkbox" class="menu-item" data-name="Margherita" data-price="150"></div>
-        <div class="item"><span>Paneer Tikka Pizza</span> <input type="checkbox" class="menu-item" data-name="Paneer Tikka" data-price="210"></div>
+    <div id="menu-container">
+        </div>
+
+    <div style="height: 100px;"></div> <div class="order-bar">
+        <div class="total-info">Total: ₹<span id="grand-total">0</span></div>
+        <button class="order-btn" onclick="placeOrder()">🚀 Order Now</button>
     </div>
-
-    <div class="category-header" onclick="toggleCategory('bur')">🍔 BURGER <span>▼</span></div>
-    <div id="bur" class="category-content">
-        <div class="item"><span>Veg Burger</span> <input type="checkbox" class="menu-item" data-name="Veg Burger" data-price="60"></div>
-        <div class="item"><span>Cheese Burger</span> <input type="checkbox" class="menu-item" data-name="Cheese Burger" data-price="90"></div>
-    </div>
-
-    <div class="category-header" onclick="toggleCategory('tea')">☕ TEA & COFFEE <span>▼</span></div>
-    <div id="tea" class="category-content">
-        <div class="item"><span>Masala Tea</span> <input type="checkbox" class="menu-item" data-name="Masala Tea" data-price="20"></div>
-        <div class="item"><span>Cold Coffee</span> <input type="checkbox" class="menu-item" data-name="Cold Coffee" data-price="70"></div>
-    </div>
-
-    <div class="category-header" onclick="toggleCategory('sw')">🥪 SANDWICH <span>▼</span></div>
-    <div id="sw" class="category-content">
-        <div class="item"><span>Veg Grilled</span> <input type="checkbox" class="menu-item" data-name="Veg Grilled" data-price="80"></div>
-        <div class="item"><span>Paneer Sandwich</span> <input type="checkbox" class="menu-item" data-name="Paneer Sandwich" data-price="120"></div>
-    </div>
-
-    <div class="category-header" onclick="toggleCategory('cold')">🥤 COLDRINKS <span>▼</span></div>
-    <div id="cold" class="category-content">
-        <div class="item"><span>Coke 500ml</span> <input type="checkbox" class="menu-item" data-name="Coke" data-price="40"></div>
-        <div class="item"><span>Water Bottle</span> <input type="checkbox" class="menu-item" data-name="Water" data-price="20"></div>
-    </div>
-
-    <button class="order-btn" onclick="placeOrder()">🚀 BHEJO ORDER</button>
 
     <script>
         const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; // APNA URL YAHAN DALO
+
+        const menuData = {
+            "🍕 Pizza": [
+                { name: "Margherita", price: 150 },
+                { name: "Paneer Tikka Pizza", price: 210 }
+            ],
+            "🍔 Burger": [
+                { name: "Aloo Tikki Burger", price: 60 },
+                { name: "Cheese Burger", price: 90 }
+            ],
+            "🥪 Sandwich": [
+                { name: "Veg Grilled", price: 80 },
+                { name: "Paneer Sandwich", price: 120 }
+            ],
+            "☕ Tea & Coffee": [
+                { name: "Masala Tea", price: 20 },
+                { name: "Cold Coffee", price: 70 }
+            ],
+            "🥤 Coldrinks": [
+                { name: "Coke 500ml", price: 40 },
+                { name: "Water Bottle", price: 20 }
+            ]
+        };
+
+        let cart = {};
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            for (let cat in menuData) {
+                let html = `<div class="category-header" onclick="toggleCategory('${cat}')">${cat} <span>▼</span></div>`;
+                html += `<div id="${cat}" class="category-content">`;
+                menuData[cat].forEach(item => {
+                    html += `
+                        <div class="item">
+                            <div class="item-info">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-price">₹${item.price}</div>
+                            </div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQty('${item.name}', -1, ${item.price})">-</button>
+                                <div class="qty-val" id="qty-${item.name}">0</div>
+                                <button class="qty-btn" onclick="updateQty('${item.name}', 1, ${item.price})">+</button>
+                            </div>
+                        </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        }
 
         function toggleCategory(id) {
             document.getElementById(id).classList.toggle('open');
         }
 
-        async function placeOrder() {
-            let selected = document.querySelectorAll('.menu-item:checked');
+        function updateQty(name, change, price) {
+            if (!cart[name]) cart[name] = { qty: 0, price: price };
+            cart[name].qty += change;
+            if (cart[name].qty < 0) cart[name].qty = 0;
             
-            // 🛡️ SECURITY 1: Khali order block
-            if (selected.length === 0) {
-                alert("Bhai, kuch toh select karo!");
-                return;
-            }
+            document.getElementById(`qty-${name}`).innerText = cart[name].qty;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            for (let name in cart) { total += cart[name].qty * cart[name].price; }
+            document.getElementById('grand-total').innerText = total;
+        }
+
+        async function placeOrder() {
+            let total = document.getElementById('grand-total').innerText;
+            if (total == "0") { alert("Bhai, kuch toh select karo!"); return; }
 
             let name = prompt("Aapka Naam?");
             let phone = prompt("Aapka Phone Number?");
-            
-            // 🛡️ SECURITY 2: Galat number block
-            if(!name || !phone || phone.length < 10) {
-                alert("Sahi details dalo bhai!");
-                return;
-            }
+            if (!name || !phone || phone.length < 10) { alert("Sahi details dalo!"); return; }
 
             let items = "";
-            let total = 0;
-            selected.forEach(i => {
-                items += i.dataset.name + ", ";
-                total += parseInt(i.dataset.price);
-            });
+            for (let n in cart) {
+                if (cart[n].qty > 0) items += `${n} (x${cart[n].qty}), `;
+            }
 
-            // 🛡️ SECURITY 3: WhatsApp/Mail logic
+            // Bullet Proof Logic
+            alert("Order ja raha hai... Total: ₹" + total);
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify({oid: "ORD"+Date.now(), name: name, phone: phone, items: items, total: total})
-            });
-            alert("Order Successful! Total: ₹" + total);
+            }).then(() => { alert("✅ Order Success! Gmail check karein."); });
         }
+
+        renderMenu();
     </script>
 </body>
 </html>
