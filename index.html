@@ -1,4 +1,4 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -87,7 +87,7 @@
     </div>
 
     <script>
-        const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; 
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbziUkJh39aR_PvcN6PWPQRM1qzIMRpyb8wFB-r5FZQbRW1eB2tpe7dN1a924Ggupi5Rag/exec'; 
         const myWhatsApp = "918078619566"; // Aapka number
         let cart = {};
 
@@ -107,9 +107,8 @@
         async function placeOrder() {
             let total = document.getElementById('grand-total').innerText;
             if (total == "0") { alert("Bhai, khali order mat bhejo!"); return; }
-
             let name = prompt("Aapka Naam?");
-
+            let name = prompt("Aapka Address?");
             let phone = prompt("Aapka Number?");
             if (!phone || phone.length < 10) { alert("Sahi number dalo!"); return; }
             let items = "";
@@ -128,4 +127,4 @@
         }
     </script>
 </body>
-</html>        { 
+</html>        
