@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrushersCafe - Order Online</title>
+    <title>CrushersCafe - Premium Order</title>
     <style>
         :root { --gold: #D4AF37; --black: #050505; --card: #121212; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--black); color: white; margin: 0; padding: 15px; padding-bottom: 100px; }
@@ -12,6 +12,7 @@
         h2 { color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin: 10px 0; }
         .info { font-size: 0.85rem; color: #aaa; line-height: 1.4; }
 
+        /* Premium Category Animation */
         .category-header { 
             background: linear-gradient(45deg, #D4AF37, #B8860B); color: black; 
             padding: 15px; cursor: pointer; font-weight: bold; border-radius: 10px; 
@@ -20,6 +21,7 @@
         .category-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: var(--card); }
         .category-content.open { max-height: 1000px; padding: 10px; border: 1px solid #222; border-radius: 0 0 10px 10px; }
         
+        /* Quantity Selector Design */
         .item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
         .item-name { font-size: 1.1rem; }
         .item-price { color: var(--gold); font-size: 0.9rem; }
@@ -28,9 +30,10 @@
         .qty-btn { background: var(--gold); color: black; border: none; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; }
         .qty-val { width: 35px; text-align: center; font-weight: bold; }
         
+        /* Bullet-Proof Footer */
         .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 15px; border-top: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
         .total-box { font-size: 1.2rem; font-weight: bold; }
-        .order-btn { background: var(--gold); color: black; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(212,175,55,0.3); }
+        .order-btn { background: var(--gold); color: black; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -39,47 +42,11 @@
         <h2>⚜️ CrushersCafe ⚜️</h2>
         <div class="info">
             📍 Opposite City Mall, Ajmer<br>
-            📞 +91 8078619566 | 📧 crushescafe@gmail.com
+            📞 +91 99XXXXXX27 | 📧 crushescafe@gmail.com
         </div>
     </div>
 
-    <div id="menu-container">
-        <div class="category-header" onclick="toggle('piz')">🍕 PIZZA <span>▼</span></div>
-        <div id="piz" class="category-content">
-            <div class="item">
-                <div class="item-info"><div class="item-name">Margherita</div><div class="item-price">₹150</div></div>
-                <div class="qty-controls">
-                    <button class="qty-btn" onclick="updateQty('Margherita', -1, 150)">-</button>
-                    <span id="qty-Margherita" class="qty-val">0</span>
-                    <button class="qty-btn" onclick="updateQty('Margherita', 1, 150)">+</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="category-header" onclick="toggle('bur')">🍔 BURGER <span>▼</span></div>
-        <div id="bur" class="category-content">
-            <div class="item">
-                <div class="item-info"><div class="item-name">Veg Cheese Burger</div><div class="item-price">₹90</div></div>
-                <div class="qty-controls">
-                    <button class="qty-btn" onclick="updateQty('Veg Cheese Burger', -1, 90)">-</button>
-                    <span id="qty-Veg Cheese Burger" class="qty-val">0</span>
-                    <button class="qty-btn" onclick="updateQty('Veg Cheese Burger', 1, 90)">+</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="category-header" onclick="toggle('tea')">☕ TEA & COFFEE <span>▼</span></div>
-        <div id="tea" class="category-content">
-            <div class="item">
-                <div class="item-info"><div class="item-name">Masala Tea</div><div class="item-price">₹20</div></div>
-                <div class="qty-controls">
-                    <button class="qty-btn" onclick="updateQty('Masala Tea', -1, 20)">-</button>
-                    <span id="qty-Masala Tea" class="qty-val">0</span>
-                    <button class="qty-btn" onclick="updateQty('Masala Tea', 1, 20)">+</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="menu-container"></div>
 
     <div class="footer-bar">
         <div class="total-box">Total: ₹<span id="grand-total">0</span></div>
@@ -87,9 +54,55 @@
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbziUkJh39aR_PvcN6PWPQRM1qzIMRpyb8wFB-r5FZQbRW1eB2tpe7dN1a924Ggupi5Rag/exec'; 
-        const myWhatsApp = "918078619566"; // Aapka number
+        // Aapka naya menuData jo screenshots mein hai
+        const menuData = {
+            "🍕 Pizza": [
+                { name: "Margherita", price: 150 },
+                { name: "Paneer Tikka Pizza", price: 210 }
+            ],
+            "🍔 Burger": [
+                { name: "Aloo Tikki Burger", price: 60 },
+                { name: "Cheese Burger", price: 90 }
+            ],
+            "🥪 Sandwich": [
+                { name: "Veg Grilled", price: 80 },
+                { name: "Paneer Sandwich", price: 120 }
+            ],
+            "☕ Tea & Coffee": [
+                { name: "Masala Tea", price: 20 },
+                { name: "Cold Coffee", price: 70 }
+            ],
+            "🥤 Coldrinks": [
+                { name: "Coke 500ml", price: 40 },
+                { name: "Water Bottle", price: 20 }
+            ]
+        };
+
+        const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; // APNA URL YAHAN DALO
+        const myWhatsApp = "918078619566"; // Aapka Ajmer cafe number
         let cart = {};
+
+        // Menu ko design ke saath render karna
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            for (let cat in menuData) {
+                let html = `<div class="category-header" onclick="toggle('${cat}')">${cat} <span>▼</span></div>`;
+                html += `<div id="${cat}" class="category-content">`;
+                menuData[cat].forEach(item => {
+                    html += `
+                        <div class="item">
+                            <div><div class="item-name">${item.name}</div><div class="item-price">₹${item.price}</div></div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQty('${item.name}', -1, ${item.price})">-</button>
+                                <span id="qty-${item.name}" class="qty-val">0</span>
+                                <button class="qty-btn" onclick="updateQty('${item.name}', 1, ${item.price})">+</button>
+                            </div>
+                        </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        }
 
         function toggle(id) { document.getElementById(id).classList.toggle('open'); }
 
@@ -107,14 +120,12 @@
         async function placeOrder() {
             let total = document.getElementById('grand-total').innerText;
             if (total == "0") { alert("Bhai, khali order mat bhejo!"); return; }
+
             let name = prompt("Aapka Naam?");
-            let name = prompt("Aapka Address?");
-            let phone = prompt("Aapka Number?");
-            if (!phone || phone.length < 10) { alert("Sahi number dalo!"); return; }
             let items = "";
             for (let n in cart) { if (cart[n].qty > 0) items += n + " (x" + cart[n].qty + "), "; }
 
-            // 1. Google Sheet/Mail Backend
+            // 1. Google Sheet Backend
             fetch(scriptURL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -122,9 +133,11 @@
             });
 
             // 2. WhatsApp Direct
-            let msg = `🔥 *NEW ORDER: CrushersCafe* 🔥%0A👤 *Name:* ${name}%0A📦 *Items:* ${items}%0A💰 *Total:* ₹${total}%0A📍 *Loc:* Ajmer`;
+            let msg = `🔥 *NEW ORDER: CrushersCafe* 🔥%0A👤 *Name:* ${name}%0A📦 *Items:* ${items}%0A💰 *Total:* ₹${total}%0A📍 Ajmer`;
             window.open(`https://wa.me/${myWhatsApp}?text=${msg}`, '_blank');
         }
+
+        renderMenu();
     </script>
 </body>
-</html>        
+</html>
