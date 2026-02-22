@@ -120,8 +120,11 @@
         async function placeOrder() {
             let total = document.getElementById('grand-total').innerText;
             if (total == "0") { alert("Bhai, khali order mat bhejo!"); return; }
-
             let name = prompt("Aapka Naam?");
+            let address = prompt("Aapka Address?");
+            let phone = prompt("Aapka Phone Number?");
+            if (!name || !address|| !phone || phone.length < 10) { alert("Sahi details dalo!"); return; }
+            
             let items = "";
             for (let n in cart) { if (cart[n].qty > 0) items += n + " (x" + cart[n].qty + "), "; }
 
