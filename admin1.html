@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrushersCafe - Premium</title>
+    <style>
+        :root { --gold: #D4AF37; --black: #050505; --card: #121212; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--black); color: white; margin: 0; padding: 15px; padding-bottom: 100px; }
+        
+        /* Logo Styling */
+        .logo-container { text-align: center; padding: 20px 0; }
+        .logo-img { width: 120px; height: 120px; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
+        
+        .header h2 { color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin: 10px 0; text-align: center; }
+        .info { font-size: 0.85rem; color: #aaa; text-align: center; margin-bottom: 20px; }
+
+        .category-header { background: var(--gold); color: black; padding: 15px; cursor: pointer; font-weight: bold; border-radius: 10px; margin-top: 15px; display: flex; justify-content: space-between; }
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: var(--card); }
+        .category-content.open { max-height: 1000px; padding: 10px; border: 1px solid #222; border-radius: 0 0 10px 10px; }
+        
+        .item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
+        .qty-controls { display: flex; align-items: center; background: #222; border-radius: 5px; padding: 5px; }
+        .qty-btn { background: var(--gold); border: none; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .qty-val { width: 35px; text-align: center; font-weight: bold; }
+        
+        .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); padding: 15px; border-top: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .order-btn { background: var(--gold); color: black; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        #adminLayer { display:none; position:fixed; top:5%; left:5%; right:5%; bottom:5%; background:#111; border:2px solid var(--gold); padding:20px; z-index:9999; overflow-y:auto; border-radius:12px; }
+        input { width:90%; padding:12px; margin: 10px 0; background:#222; color:white; border:1px solid var(--gold); border-radius:5px; }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="https://i.ibb.co/vzYpYmS/logo.png" class="logo-img" alt="CrushersCafe Logo"> 
+    </div>
+
+    <div class="header">
+        <h2>⚜️ CrushersCafe ⚜️</h2>
+        <div class="info">📍 Opposite City Mall, Ajmer</div>
+    </div>
+
+    <div id="menu-container">Loading Menu...</div>
+
+    <div class="footer-bar">
+        <div style="font-size: 1.2rem; font-weight: bold;">Total: ₹<span id="grand-total">0</span></div>
+        <button class="order-btn" onclick="placeOrder()">🚀 Order on WhatsApp</button>
+    </div>
+
+    <p onclick="openAdmin()" style="text-align:center; font-size:10px; color:#222; margin-top:50px; cursor:pointer;">Admin Control</p>
+
+    <div id="adminLayer">
+        <h3 style="color:var(--gold);">🛠️ Add New Item</h3>
+        <input type="text" id="newCat" placeholder="Category (e.g. 🍕 Pizza)">
+        <input type="text" id="newItem" placeholder="Item Name">
+        <input type="number" id="newPrice" placeholder="Price">
+        <button onclick="saveToMenu()" style="width:100%; padding:15px; background:var(--gold); border:none; font-weight:bold; border-radius:5px; cursor:pointer;">✅ Save & Refresh</button>
+        <button onclick="document.getElementById('adminLayer').style.display='none'" style="width:100%; padding:10px; background:#444; color:white; border:none; margin-top:10px; border-radius:5px;">Close</button>
+    </div>
+
+    <script>
+        const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; //
+        const myWhatsApp = "9199XXXXXX27"; //
+        let cart = {};
+
+        async function loadMenu() {
+            const res = await fetch(scriptURL + "?action=getMenu");
+            const menuData = await res.json();
+            const container = document.getElementById('menu-container');
+            container.innerHTML = "";
+            for (let cat in menuData) {
+                let html = `<div class="category-header" onclick="this.nextElementSibling.classList.toggle('open')">${cat} <span>▼</span></div><div class="category-content">`;
+                menuData[cat].forEach(item => {
+                    html += `<div class="item"><div><div class="item-name">${item.name}</div><div class="item-price">₹${item.price}</div></div>
+                        <div class="qty-controls">
+                        <button class="qty-btn" onclick="updateQty('${item.name}', -1, ${item.price})">-</button>
+                        <span id="qty-${item.name}" class="qty-val">0</span>
+                        <button class="qty-btn" onclick="updateQty('${item.name}', 1, ${item.price})">+</button>
+                        </div></div>`;
+                });
+                container.innerHTML += html + `</div>`;
+            }
+        }
+
+        function updateQty(name, change, price) {
+            if (!cart[name]) cart[name] = { qty: 0, price: price };
+            cart[name].qty += change;
+            if (cart[name].qty < 0) cart[name].qty = 0;
+            document.getElementById(`qty-${name}`).innerText = cart[name].qty;
+            let total = 0;
+            for (let n in cart) { total += cart[n].qty * cart[n].price; }
+            document.getElementById('grand-total').innerText = total;
+        }
+
+        function openAdmin() {
+            if (prompt("Admin Key:") === "Google 127") {
+                document.getElementById('adminLayer').style.display = 'block';
+            }
+        }
+
+        async function saveToMenu() {
+            let cat = document.getElementById('newCat').value;
+            let item = document.getElementById('newItem').value;
+            let price = document.getElementById('newPrice').value;
+            if(!cat || !item || !price) return alert("Details bharo!");
+            
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({action: "updateMenu", cat: cat, item: item, price: price})
+            }).then(() => { 
+                alert("Menu Updated! Refreshing...");
+                location.reload(); // PAGE REFRESH CODE
+            });
+        }
+
+        async function placeOrder() {
+            let total = document.getElementById('grand-total').innerText;
+            if (total == "0") return alert("Kuch chuno!");
+            let name = prompt("Aapka Naam?");
+            let items = "";
+            for (let n in cart) { if (cart[n].qty > 0) items += n + " (x" + cart[n].qty + "), "; }
+            
+            let msg = `🔥 *ORDER: CrushersCafe* 🔥%0A👤 *Name:* ${name}%0A📦 *Items:* ${items}%0A💰 *Total:* ₹${total}`;
+            window.open(`https://wa.me/${myWhatsApp}?text=${msg}`, '_blank');
+        }
+
+        loadMenu();
+    </script>
+</body>
+</html>
