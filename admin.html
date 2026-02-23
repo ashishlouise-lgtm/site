@@ -1,57 +1,141 @@
-<div id="secureLayer" style="display:none;">
-    <div id="adminTableContainer" style="background:#111; padding:20px; border:2px solid #D4AF37; margin:20px; border-radius:10px; position:fixed; top:10%; left:5%; right:5%; z-index:9999; max-height:80vh; overflow-y:auto;">
-        <h3 style="color:#D4AF37; text-align:center;">📋 CrushersCafe Live Orders</h3>
-        <table style="width:100%; color:white; border-collapse:collapse; font-size:0.8rem;">
-            <thead>
-                <tr style="background:#222; color:#D4AF37;">
-                    <th style="padding:8px; border:1px solid #444;">OID</th>
-                    <th style="padding:8px; border:1px solid #444;">Name</th>
-                    <th style="padding:8px; border:1px solid #444;">Phone</th>
-                    <th style="padding:8px; border:1px solid #444;">Total</th>
-                </tr>
-            </thead>
-            <tbody id="adminTableBody"></tbody>
-        </table>
-        <button onclick="closeAdmin()" style="width:100%; background:#D4AF37; color:black; padding:10px; margin-top:15px; border:none; border-radius:5px; font-weight:bold;">Logout & Lock</button>
-    </div>
-</div>
-
-<script>
-async function openAdmin() {
-    // 1. Password Check
-    var pass = prompt("Access Denied! Enter Admin Key:");
-    
-    if (pass === "google127") {
-        // 2. Sirf sahi password par hi link aur table activate hogi
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbziiUkJh39aR_PvcN6PWPQRM1qzIMRpyb8wFB-r5FZQbRW1eB2tpa7dN1a924Ggupi5Rag/exec';
+             <!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrushersCafe - Premium Admin</title>
+    <style>
+        :root { --gold: #D4AF37; --black: #050505; --card: #121212; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--black); color: white; margin: 0; padding: 15px; padding-bottom: 100px; }
         
-        try {
-            const res = await fetch(scriptURL.replace('/exec', '/gviz/tq?tqx=out:json'));
-            const text = await res.text();
-            const data = JSON.parse(text.substr(47).slice(0, -2));
-            
-            let rows = "";
-            data.table.rows.forEach(r => {
-                rows += `<tr style="border-bottom:1px solid #333;">
-                    <td style="padding:5px;">${r.c[0] ? r.c[0].v : '-'}</td>
-                    <td style="padding:5px;">${r.c[1] ? r.c[1].v : '-'}</td>
-                    <td style="padding:5px;">${r.c[2] ? r.c[2].v : '-'}</td>
-                    <td style="padding:5px;">₹${r.c[5] ? r.c[5].v : '0'}</td>
-                </tr>`;
-            });
-            
-            document.getElementById('adminTableBody').innerHTML = rows;
-            document.getElementById('secureLayer').style.display = 'block'; // Parda uthao
-        } catch (e) {
-            alert("Error 404: System Locked!");
-        }
-    } else {
-        alert("Invalid Access! Error 403: Forbidden.");
-    }
-}
+        /* 🎨 Logo Section */
+        .logo-container { text-align: center; padding: 10px 0; }
+        .logo-img { width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--gold); box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+        
+        h2 { text-align:center; color:var(--gold); text-transform:uppercase; letter-spacing:2px; margin: 10px 0; }
+        .info { text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 20px; }
 
-function closeAdmin() {
-    document.getElementById('secureLayer').style.display = 'none';
-    document.getElementById('adminTableBody').innerHTML = ''; // Data saaf kar do
-}
-</script>
+        /* Premium Categories */
+        .category-header { background: var(--gold); color: black; padding: 15px; cursor: pointer; font-weight: bold; border-radius: 10px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: var(--card); border-radius: 0 0 10px 10px; }
+        .category-content.open { max-height: 1000px; padding: 10px; border: 1px solid #333; }
+        
+        /* Quantity Controls */
+        .item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
+        .qty-controls { display: flex; align-items: center; background: #222; border-radius: 5px; padding: 5px; }
+        .qty-btn { background: var(--gold); border: none; width: 32px; height: 32px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .qty-val { width: 35px; text-align: center; font-weight: bold; }
+        
+        .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; border-top: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .order-btn { background: var(--gold); color: black; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* 🛠️ Admin Panel Layer */
+        #adminLayer { display:none; position:fixed; top:5%; left:5%; right:5%; bottom:5%; background:#111; border:2px solid var(--gold); padding:20px; z-index:9999; overflow-y:auto; border-radius:15px; }
+        input { width:90%; padding:12px; margin: 10px 0; background:#222; color:white; border:1px solid var(--gold); border-radius:8px; display: block; margin-left: auto; margin-right: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="https://i.ibb.co/vzYpYmS/logo.png" class="logo-img" alt="CrushersCafe Logo">
+    </div>
+
+    <h2>⚜️ CRUSHERS CAFE ⚜️</h2>
+    <div class="info">📍 Opposite City Mall, Ajmer | 📞 +91 99XXXXXX27</div>
+
+    <div id="menu-container">Loading Menu Goli Ki Raftar Se...</div>
+
+    <div class="footer-bar">
+        <div style="font-size: 1.2rem; font-weight: bold;">Total: ₹<span id="grand-total">0</span></div>
+        <button class="order-btn" onclick="placeOrder()">🚀 BHEJO ORDER</button>
+    </div>
+
+    <p onclick="openAdmin()" style="text-align:center; font-size:10px; color:#222; margin-top:50px; cursor:pointer;">Admin Control</p>
+
+    <div id="adminLayer">
+        <h3 style="color:var(--gold); text-align:center;">🛠️ Add New Item to Menu</h3>
+        <input type="text" id="newCat" placeholder="Category (e.g. 🍕 Pizza)">
+        <input type="text" id="newItem" placeholder="Item Name">
+        <input type="number" id="newPrice" placeholder="Price">
+        <button onclick="saveToMenu()" style="width:100%; padding:15px; background:var(--gold); border:none; font-weight:bold; border-radius:8px; margin-top:10px; cursor:pointer;">✅ Save & Refresh Website</button>
+        <button onclick="document.getElementById('adminLayer').style.display='none'" style="width:100%; padding:10px; background:#444; color:white; border:none; margin-top:15px; border-radius:8px; cursor:pointer;">Close</button>
+    </div>
+
+    <script>
+        // ⚠️ APNA URL YAHAN DALO
+        const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE';
+        const myWhatsApp = "9199XXXXXX27";
+        let cart = {};
+
+        async function loadMenu() {
+            try {
+                const res = await fetch(scriptURL + "?action=getMenu");
+                const menuData = await res.json();
+                const container = document.getElementById('menu-container');
+                container.innerHTML = "";
+                for (let cat in menuData) {
+                    let html = `<div class="category-header" onclick="this.nextElementSibling.classList.toggle('open')">${cat} <span>▼</span></div><div class="category-content">`;
+                    menuData[cat].forEach(item => {
+                        html += `<div class="item"><div><div class="item-name">${item.name}</div><div class="item-price">₹${item.price}</div></div>
+                            <div class="qty-controls">
+                            <button class="qty-btn" onclick="updateQty('${item.name}', -1, ${item.price})">-</button>
+                            <span id="qty-${item.name}" class="qty-val">0</span>
+                            <button class="qty-btn" onclick="updateQty('${item.name}', 1, ${item.price})">+</button>
+                            </div></div>`;
+                    });
+                    container.innerHTML += html + `</div>`;
+                }
+            } catch(e) { console.log("Menu error!"); }
+        }
+
+        function updateQty(name, change, price) {
+            if (!cart[name]) cart[name] = { qty: 0, price: price };
+            cart[name].qty += change;
+            if (cart[name].qty < 0) cart[name].qty = 0;
+            document.getElementById(`qty-${name}`).innerText = cart[name].qty;
+            let total = 0;
+            for (let n in cart) { total += cart[n].qty * cart[n].price; }
+            document.getElementById('grand-total').innerText = total;
+        }
+
+        function openAdmin() {
+            if (prompt("Admin Key:") === "Google 127") {
+                document.getElementById('adminLayer').style.display = 'block';
+            }
+        }
+
+        async function saveToMenu() {
+            let cat = document.getElementById('newCat').value;
+            let item = document.getElementById('newItem').value;
+            let price = document.getElementById('newPrice').value;
+            if(!cat || !item || !price) return alert("Sari details bharo bhai!");
+
+            alert("Menu Update Ho Raha Hai... Wait Karo!");
+            
+            // 🛡️ REFRESH CODE LOGIC
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({action: "updateMenu", cat: cat, item: item, price: price})
+            }).then(() => { 
+                alert("Success! Page Refresh Ho Raha Hai."); 
+                location.reload(); // PAGE AUTO REFRESH
+            }).catch(() => alert("Network error!"));
+        }
+
+        async function placeOrder() {
+            let total = document.getElementById('grand-total').innerText;
+            if (total == "0") return alert("Bhai kuch toh chuno!");
+            let name = prompt("Aapka Naam?");
+            let items = "";
+            for (let n in cart) { if (cart[n].qty > 0) items += n + " (x" + cart[n].qty + "), "; }
+            
+            // 📲 WHATSAPP JUGAD
+            let msg = `🔥 *ORDER: CrushersCafe* 🔥%0A👤 *Name:* ${name}%0A📦 *Items:* ${items}%0A💰 *Total:* ₹${total}`;
+            window.open(`https://wa.me/${myWhatsApp}?text=${msg}`, '_blank');
+        }
+
+        loadMenu();
+    </script>
+</body>
+</html>       
