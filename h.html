@@ -8,175 +8,153 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
-body{
-font-family:Arial;
-background:#0f0f0f;
-color:white;
-padding:20px;
-}
-h1{text-align:center;color:#d4af37;}
-.item{
-background:#1a1a1a;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-button{
-background:#d4af37;
-border:none;
-padding:6px 12px;
-border-radius:5px;
-cursor:pointer;
-}
-.cart{
-margin-top:20px;
-background:#1a1a1a;
-padding:15px;
-border-radius:8px;
-}
-input,textarea{
-width:100%;
-margin-top:8px;
-padding:8px;
-border-radius:5px;
-border:none;
-}
-.error{color:red;font-size:12px;}
-.total{color:#d4af37;font-weight:bold;}
+body{margin:0;font-family:Arial;background:#f8f8f8;}
+header{background:#e23744;color:white;padding:15px;text-align:center;font-size:22px;font-weight:bold;}
+.category-bar{display:flex;gap:10px;padding:10px;background:white;overflow:auto;}
+.category-bar button{background:#e23744;color:white;border:none;padding:8px 14px;border-radius:20px;cursor:pointer;}
+.container{padding:15px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:15px;}
+.card{background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:10px;}
+.price{color:#e23744;font-weight:bold;margin:5px 0;}
+.qty-box{display:flex;justify-content:space-between;}
+.qty-box button{background:#e23744;border:none;color:white;width:28px;height:28px;border-radius:50%;}
+.cart{background:white;margin:15px;padding:12px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,0.1);}
+.cart-item{display:flex;justify-content:space-between;}
+.total{color:#e23744;font-weight:bold;margin-top:10px;}
+.place-btn{width:100%;background:#e23744;color:white;border:none;padding:10px;border-radius:6px;margin-top:10px;}
+.popup{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;}
+.popup-content{background:white;padding:20px;width:300px;border-radius:10px;}
+.popup-content input,textarea{width:100%;margin-top:8px;padding:8px;border-radius:5px;border:1px solid #ccc;}
 </style>
 </head>
 <body>
 
-<h1>Royal Cafe ☕</h1>
+<header>Royal Cafe ☕</header>
 
-<div id="menu"></div>
+<div class="category-bar" id="categoryBar"></div>
+<div class="container" id="menu"></div>
 
 <div class="cart">
 <h3>Your Cart</h3>
 <div id="cartItems"></div>
-<p class="total" id="total">Total: ₹0</p>
+<div class="total" id="total">Total: ₹0</div>
+<button class="place-btn" onclick="openPopup()">Place Order</button>
+</div>
 
-<h3>Customer Details</h3>
+<div class="popup" id="popup">
+<div class="popup-content">
+<h3>Customer Information</h3>
 <input id="name" placeholder="Full Name">
-<div id="nameError" class="error"></div>
-
 <input id="phone" placeholder="Phone">
-<div id="phoneError" class="error"></div>
-
 <textarea id="address" placeholder="Address"></textarea>
-<div id="addressError" class="error"></div>
-
-<button onclick="placeOrder()">Place Order</button>
+<button class="place-btn" onclick="placeOrder()">Confirm Order</button>
+</div>
 </div>
 
 <script>
 
 emailjs.init("YOUR_PUBLIC_KEY");
-
 const WHATSAPP="918078619566";
 
-let menu=JSON.parse(localStorage.getItem("menu"))||[
-{name:"Cappuccino",price:120},
-{name:"Latte",price:140},
-{name:"Burger",price:100}
-];
+let menuData=JSON.parse(localStorage.getItem("menuData"))||{
+Coffee:[{name:"Hot Coffee",price:120},{name:"Cold Coffee",price:150}],
+Tea:[{name:"Masala Tea",price:40},{name:"Lemon Tea",price:35}]
+};
 
+let currentCategory=Object.keys(menuData)[0];
 let cart=[];
 
-function loadMenu(){
+function loadCategories(){
 let html="";
-menu.forEach((item,i)=>{
+for(let cat in menuData){
+html+=`<button onclick="showCategory('${cat}')">${cat}</button>`;
+}
+document.getElementById("categoryBar").innerHTML=html;
+}
+
+function showCategory(category){
+currentCategory=category;
+loadMenu();
+}
+
+function loadMenu(){
+let items=menuData[currentCategory];
+let html="";
+items.forEach((item,i)=>{
+let cartItem=cart.find(c=>c.name===item.name);
+let qty=cartItem?cartItem.qty:0;
 html+=`
-<div class="item">
-<span>${item.name} - ₹${item.price}</span>
-<button onclick="addToCart(${i})">Add</button>
+<div class="card">
+<h4>${item.name}</h4>
+<div class="price">₹${item.price}</div>
+<div class="qty-box">
+<button onclick="decrease('${currentCategory}',${i})">-</button>
+<span>${qty}</span>
+<button onclick="increase('${currentCategory}',${i})">+</button>
+</div>
 </div>`;
 });
 document.getElementById("menu").innerHTML=html;
 }
 
-function addToCart(i){
-let existing=cart.find(x=>x.name===menu[i].name);
+function increase(category,i){
+let item=menuData[category][i];
+let existing=cart.find(x=>x.name===item.name);
 if(existing) existing.qty++;
-else cart.push({...menu[i],qty:1});
+else cart.push({...item,qty:1});
+updateCart();
+}
+
+function decrease(category,i){
+let item=menuData[category][i];
+let existing=cart.find(x=>x.name===item.name);
+if(existing){existing.qty--;if(existing.qty<=0){cart=cart.filter(x=>x.name!==item.name);}}
 updateCart();
 }
 
 function updateCart(){
-let html="";
-let total=0;
+let html="";let total=0;
 cart.forEach(item=>{
 total+=item.price*item.qty;
-html+=`<p>${item.name} x ${item.qty}</p>`;
+html+=`<div class="cart-item"><span>${item.name} x ${item.qty}</span><span>₹${item.price*item.qty}</span></div>`;
 });
 document.getElementById("cartItems").innerHTML=html;
 document.getElementById("total").innerText="Total: ₹"+total;
+loadMenu();
+}
+
+function openPopup(){
+if(cart.length===0){alert("Cart empty");return;}
+document.getElementById("popup").style.display="flex";
 }
 
 function generateOrderId(name){
-let initials=name.split(" ").map(n=>n[0]).join("").toUpperCase();
-let random=Math.floor(1000+Math.random()*9000);
-return initials+"-"+random;
-}
-
-function validate(){
-let valid=true;
-let name=document.getElementById("name").value.trim();
-let phone=document.getElementById("phone").value.trim();
-let address=document.getElementById("address").value.trim();
-
-nameError.innerHTML="";
-phoneError.innerHTML="";
-addressError.innerHTML="";
-
-if(name===""){nameError.innerHTML="Required";valid=false;}
-if(!/^[0-9]{10}$/.test(phone)){phoneError.innerHTML="10 digit required";valid=false;}
-if(address===""){addressError.innerHTML="Required";valid=false;}
-if(cart.length===0){alert("Cart empty");valid=false;}
-
-return valid;
+return name.charAt(0).toUpperCase()+"-"+Math.floor(1000+Math.random()*9000);
 }
 
 function placeOrder(){
-
-if(!validate()) return;
-
 let name=document.getElementById("name").value;
 let phone=document.getElementById("phone").value;
 let address=document.getElementById("address").value;
 
-let orderId=generateOrderId(name);
-
-let total=0;
-let orderText="";
-cart.forEach(item=>{
-total+=item.price*item.qty;
-orderText+=`${item.name} x ${item.qty}\n`;
-});
-
-// Save Order in localStorage (for Admin)
-let orders=JSON.parse(localStorage.getItem("orders"))||[];
-orders.push({orderId,name,phone,address,items:orderText,total});
-localStorage.setItem("orders",JSON.stringify(orders));
-
-// Email
-emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
-name,phone,address,order:orderText,total,orderId
-});
-
-// WhatsApp (only order)
-let message=`Order ID: ${orderId}\n${orderText}Total: ₹${total}`;
-window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`);
-
-alert("Order Placed! ID: "+orderId);
-
-cart=[];
-updateCart();
+if(name===""||phone===""||address===""){
+alert("Fill all details");
+return;
 }
 
+let orderId=generateOrderId(name);
+let total=0;let orderText="";
+cart.forEach(item=>{total+=item.price*item.qty;orderText+=`${item.name} x ${item.qty}\n`;});
+
+emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{name,phone,address,order:orderText,total,orderId});
+
+window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Order ID: "+orderId+"\n"+orderText+"Total: ₹"+total)}`);
+
+alert("Order Placed Successfully!");
+cart=[];updateCart();
+document.getElementById("popup").style.display="none";
+}
+
+loadCategories();
 loadMenu();
 
 </script>
