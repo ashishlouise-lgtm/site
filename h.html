@@ -52,7 +52,7 @@ header{background:#e23744;color:white;padding:15px;text-align:center;font-size:2
 
 <script>
 
-emailjs.init("YOUR_PUBLIC_KEY");
+emailjs.init("jBJYVshxCEY3XG1QF");
 const WHATSAPP="918078619566";
 
 let menuData=JSON.parse(localStorage.getItem("menuData"))||{
@@ -145,7 +145,7 @@ let orderId=generateOrderId(name);
 let total=0;let orderText="";
 cart.forEach(item=>{total+=item.price*item.qty;orderText+=`${item.name} x ${item.qty}\n`;});
 
-emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{name,phone,address,order:orderText,total,orderId});
+emailjs.send("service_yeovzfg","template_e1bte0u",{name,phone,address,order:orderText,total,orderId});
 
 window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Order ID: "+orderId+"\n"+orderText+"Total: ₹"+total)}`);
 
