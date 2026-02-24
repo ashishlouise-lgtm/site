@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,19 +6,27 @@
 <style>
 body{font-family:Arial;background:#111;color:white;padding:20px;}
 input{width:100%;padding:8px;margin-top:8px;}
-button{margin-top:8px;padding:8px;background:#e23744;color:white;border:none;}
+button{margin-top:8px;padding:8px;background:#e23744;color:white;border:none;cursor:pointer;}
 .success{color:lime;}
 .error{color:red;}
+.order-box{background:#222;padding:10px;margin-top:10px;border-radius:6px;}
+.logout{background:black;border:1px solid #e23744;}
 </style>
 </head>
 <body>
 
-<h2>Admin Login</h2>
-<input type="password" id="pass" placeholder="Enter Password">
-<button onclick="login()">Login</button>
+<h2>Admin Panel</h2>
 <p id="msg"></p>
 
+<div id="loginBox">
+<input type="password" id="pass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+</div>
+
 <div id="panel" style="display:none;">
+
+<button class="logout" onclick="logout()">Logout</button>
+
 <h3>Add Category</h3>
 <input id="catName" placeholder="Category Name">
 <button onclick="addCategory()">Add</button>
@@ -27,35 +36,62 @@ button{margin-top:8px;padding:8px;background:#e23744;color:white;border:none;}
 <input id="itemName" placeholder="Item Name">
 <input id="itemPrice" placeholder="Price">
 <button onclick="addItem()">Add Item</button>
+
+<h3>Order History</h3>
+<div id="orders"></div>
+
 </div>
 
 <script>
 
+/* SECRET URL CHECK */
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get("key") !== "royal123"){
+document.body.innerHTML="<h2 style='color:red'>Access Denied</h2>";
+}
+
+/* LOGIN */
 function login(){
 if(document.getElementById("pass").value==="admin123"){
 document.getElementById("panel").style.display="block";
+document.getElementById("loginBox").style.display="none";
 msg.innerHTML="Login Successful";
 msg.className="success";
+loadOrders();
 }else{
 msg.innerHTML="Wrong Password";
 msg.className="error";
 }
 }
 
+/* LOGOUT */
+function logout(){
+location.reload();
+}
+
+/* ADD CATEGORY */
 function addCategory(){
 let data=JSON.parse(localStorage.getItem("menuData"))||{};
 let name=catName.value;
-if(!data[name]){data[name]=[];}
+
+if(!data[name]){
+data[name]=[];
 localStorage.setItem("menuData",JSON.stringify(data));
-msg.innerHTML="Category Added Successfully";
+msg.innerHTML="Category Added";
 msg.className="success";
+}else{
+msg.innerHTML="Category Already Exists";
+msg.className="error";
+}
 }
 
+/* ADD ITEM */
 function addItem(){
 let data=JSON.parse(localStorage.getItem("menuData"))||{};
 let cat=itemCat.value;
 let name=itemName.value;
 let price=Number(itemPrice.value);
+
 if(data[cat]){
 data[cat].push({name,price});
 localStorage.setItem("menuData",JSON.stringify(data));
@@ -67,6 +103,39 @@ msg.className="error";
 }
 }
 
+/* LOAD ORDER HISTORY */
+function loadOrders(){
+let orders=JSON.parse(localStorage.getItem("orders"))||[];
+let html="";
+
+if(orders.length===0){
+html="No Orders Yet";
+}
+
+orders.forEach((order,index)=>{
+html+=`
+<div class="order-box">
+<b>${order.orderId}</b><br>
+${order.items.replace(/\n/g,"<br>")}
+Total: ₹${order.total}<br>
+<button onclick="deleteOrder(${index})">Delete</button>
+</div>`;
+});
+
+document.getElementById("orders").innerHTML=html;
+}
+
+/* DELETE ORDER */
+function deleteOrder(index){
+let orders=JSON.parse(localStorage.getItem("orders"))||[];
+orders.splice(index,1);
+localStorage.setItem("orders",JSON.stringify(orders));
+msg.innerHTML="Order Deleted";
+msg.className="success";
+loadOrders();
+}
+
 </script>
+
 </body>
 </html>
