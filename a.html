@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Cafe</title>
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#f8f8f8;}
+header{background:#e23744;color:white;padding:15px;text-align:center;font-size:22px;font-weight:bold;}
+.category-bar{display:flex;gap:10px;padding:10px;background:white;overflow:auto;}
+.category-bar button{background:#e23744;color:white;border:none;padding:8px 14px;border-radius:20px;cursor:pointer;}
+.container{padding:15px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:15px;}
+.card{background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:10px;}
+.price{color:#e23744;font-weight:bold;margin:5px 0;}
+.qty-box{display:flex;justify-content:space-between;}
+.qty-box button{background:#e23744;border:none;color:white;width:28px;height:28px;border-radius:50%;}
+.cart{background:white;margin:15px;padding:12px;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,0.1);}
+.cart-item{display:flex;justify-content:space-between;}
+.total{color:#e23744;font-weight:bold;margin-top:10px;}
+.place-btn{width:100%;background:#e23744;color:white;border:none;padding:10px;border-radius:6px;margin-top:10px;}
+.popup{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;}
+.popup-content{background:white;padding:20px;width:300px;border-radius:10px;}
+.popup-content input,textarea{width:100%;margin-top:8px;padding:8px;border-radius:5px;border:1px solid #ccc;}
+</style>
+</head>
+<body>
+
+<header>Royal Cafe ☕</header>
+
+<div class="category-bar" id="categoryBar"></div>
+<div class="container" id="menu"></div>
+
+<div class="cart">
+<h3>Your Cart</h3>
+<div id="cartItems"></div>
+<div class="total" id="total">Total: ₹0</div>
+<button class="place-btn" onclick="openPopup()">Place Order</button>
+</div>
+
+<div class="popup" id="popup">
+<div class="popup-content">
+<h3>Customer Information</h3>
+<input id="name" placeholder="Full Name">
+<input id="phone" placeholder="Phone">
+<textarea id="address" placeholder="Address"></textarea>
+<button class="place-btn" onclick="placeOrder()">Confirm Order</button>
+</div>
+</div>
+
+<script>
+
+emailjs.init("YOUR_PUBLIC_KEY");
+const WHATSAPP="918078619566";
+
+let menuData=JSON.parse(localStorage.getItem("menuData"))||{
+Coffee:[{name:"Hot Coffee",price:120},{name:"Cold Coffee",price:150}],
+Tea:[{name:"Masala Tea",price:40},{name:"Lemon Tea",price:35}]
+};
+
+let currentCategory=Object.keys(menuData)[0];
+let cart=[];
+
+function loadCategories(){
+let html="";
+for(let cat in menuData){
+html+=`<button onclick="showCategory('${cat}')">${cat}</button>`;
+}
+document.getElementById("categoryBar").innerHTML=html;
+}
+
+function showCategory(category){
+currentCategory=category;
+loadMenu();
+}
+
+function loadMenu(){
+let items=menuData[currentCategory];
+let html="";
+items.forEach((item,i)=>{
+let cartItem=cart.find(c=>c.name===item.name);
+let qty=cartItem?cartItem.qty:0;
+html+=`
+<div class="card">
+<h4>${item.name}</h4>
+<div class="price">₹${item.price}</div>
+<div class="qty-box">
+<button onclick="decrease('${currentCategory}',${i})">-</button>
+<span>${qty}</span>
+<button onclick="increase('${currentCategory}',${i})">+</button>
+</div>
+</div>`;
+});
+document.getElementById("menu").innerHTML=html;
+}
+
+function increase(category,i){
+let item=menuData[category][i];
+let existing=cart.find(x=>x.name===item.name);
+if(existing) existing.qty++;
+else cart.push({...item,qty:1});
+updateCart();
+}
+
+function decrease(category,i){
+let item=menuData[category][i];
+let existing=cart.find(x=>x.name===item.name);
+if(existing){existing.qty--;if(existing.qty<=0){cart=cart.filter(x=>x.name!==item.name);}}
+updateCart();
+}
+
+function updateCart(){
+let html="";let total=0;
+cart.forEach(item=>{
+total+=item.price*item.qty;
+html+=`<div class="cart-item"><span>${item.name} x ${item.qty}</span><span>₹${item.price*item.qty}</span></div>`;
+});
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="Total: ₹"+total;
+loadMenu();
+}
+
+function openPopup(){
+if(cart.length===0){alert("Cart empty");return;}
+document.getElementById("popup").style.display="flex";
+}
+
+function generateOrderId(name){
+return name.charAt(0).toUpperCase()+"-"+Math.floor(1000+Math.random()*9000);
+}
+
+function placeOrder(){
+let name=document.getElementById("name").value;
+let phone=document.getElementById("phone").value;
+let address=document.getElementById("address").value;
+
+if(name===""||phone===""||address===""){
+alert("Fill all details");
+return;
+}
+
+let orderId=generateOrderId(name);
+let total=0;let orderText="";
+cart.forEach(item=>{total+=item.price*item.qty;orderText+=`${item.name} x ${item.qty}\n`;});
+
+emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{name,phone,address,order:orderText,total,orderId});
+
+window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Order ID: "+orderId+"\n"+orderText+"Total: ₹"+total)}`);
+
+alert("Order Placed Successfully!");
+cart=[];updateCart();
+document.getElementById("popup").style.display="none";
+}
+
+loadCategories();
+loadMenu();
+
+</script>
+</body>
+</html>
