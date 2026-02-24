@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Luxury Café</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#000,#1a1a1a);
+  color:#fff;
+}
+header{
+  text-align:center;
+  padding:25px;
+  font-family:'Playfair Display',serif;
+  font-size:32px;
+  color:#d4af37;
+}
+.container{max-width:1100px;margin:auto;padding:20px;}
+.category{margin-top:40px;}
+.category h2{color:#d4af37;margin-bottom:10px;}
+.item{
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  margin:10px 0;
+  display:flex;
+  justify-content:space-between;
+  box-shadow:0 0 15px rgba(212,175,55,0.3);
+}
+.item button{
+  background:#d4af37;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.cart{
+  position:fixed;
+  right:20px;
+  top:100px;
+  width:350px;
+  background:#111;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 0 30px rgba(212,175,55,0.4);
+}
+.cart h3{color:#d4af37;}
+.cart-item{margin-bottom:8px;}
+.qty-btn{
+  background:#d4af37;
+  border:none;
+  padding:2px 6px;
+  margin:0 3px;
+  border-radius:5px;
+  cursor:pointer;
+}
+.total{
+  margin-top:10px;
+  font-weight:bold;
+  color:#d4af37;
+}
+
+input,textarea{
+  width:100%;
+  margin-top:8px;
+  padding:8px;
+  border-radius:6px;
+  border:none;
+}
+
+.whatsapp-btn,.pay-btn{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.whatsapp-btn{background:#25D366;}
+.pay-btn{background:#d4af37;}
+
+.error{
+  color:red;
+  font-size:12px;
+}
+
+@media(max-width:768px){
+  .cart{
+    position:relative;
+    width:100%;
+    top:0;
+    right:0;
+    margin-top:30px;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>Royal Luxury Café ☕</header>
+
+<div class="container" id="menu"></div>
+
+<div class="cart">
+  <h3>Your Order</h3>
+  <div id="cartItems"></div>
+  <div class="total" id="total"></div>
+
+  <h3 style="margin-top:15px;">Customer Details</h3>
+  <input type="text" id="name" placeholder="Full Name">
+  <div class="error" id="nameError"></div>
+
+  <input type="text" id="phone" placeholder="Phone Number">
+  <div class="error" id="phoneError"></div>
+
+  <textarea id="address" placeholder="Full Address"></textarea>
+  <div class="error" id="addressError"></div>
+
+  <button class="whatsapp-btn" onclick="sendWhatsApp()">Order on WhatsApp</button>
+  <button class="pay-btn" onclick="payNow()">Pay with Razorpay</button>
+</div>
+
+<script>
+
+const menu=[
+  {category:"Coffee",name:"Cappuccino",price:120},
+  {category:"Coffee",name:"Latte",price:140},
+  {category:"Fast Food",name:"Burger",price:100},
+  {category:"Fast Food",name:"Pizza",price:250}
+];
+
+let cart=[];
+
+function loadMenu(){
+  const container=document.getElementById("menu");
+  const categories=[...new Set(menu.map(i=>i.category))];
+
+  categories.forEach(cat=>{
+    container.innerHTML+=`<div class="category"><h2>${cat}</h2><div id="${cat}"></div></div>`;
+    const catDiv=document.getElementById(cat);
+
+    menu.filter(i=>i.category===cat).forEach((item,index)=>{
+      catDiv.innerHTML+=`
+      <div class="item">
+        <div>${item.name} - ₹${item.price}</div>
+        <button onclick="addToCart(${index})">Add</button>
+      </div>`;
+    });
+  });
+}
+
+function addToCart(index){
+  const existing=cart.find(i=>i.name===menu[index].name);
+  if(existing) existing.qty++;
+  else cart.push({...menu[index],qty:1});
+  updateCart();
+}
+
+function changeQty(name,change){
+  const item=cart.find(i=>i.name===name);
+  item.qty+=change;
+  if(item.qty<=0) cart=cart.filter(i=>i.name!==name);
+  updateCart();
+}
+
+function updateCart(){
+  const cartDiv=document.getElementById("cartItems");
+  const totalDiv=document.getElementById("total");
+  cartDiv.innerHTML="";
+  let total=0;
+
+  cart.forEach(item=>{
+    total+=item.price*item.qty;
+    cartDiv.innerHTML+=`
+    <div class="cart-item">
+      ${item.name}
+      <button class="qty-btn" onclick="changeQty('${item.name}',-1)">-</button>
+      ${item.qty}
+      <button class="qty-btn" onclick="changeQty('${item.name}',1)">+</button>
+      = ₹${item.price*item.qty}
+    </div>`;
+  });
+
+  totalDiv.innerHTML="Total: ₹"+total;
+}
+
+function validateForm(){
+  let valid=true;
+  const name=document.getElementById("name").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  const address=document.getElementById("address").value.trim();
+
+  document.getElementById("nameError").innerHTML="";
+  document.getElementById("phoneError").innerHTML="";
+  document.getElementById("addressError").innerHTML="";
+
+  if(name===""){document.getElementById("nameError").innerHTML="Name required";valid=false;}
+  if(phone==="" || phone.length!=10){document.getElementById("phoneError").innerHTML="Valid 10 digit phone required";valid=false;}
+  if(address===""){document.getElementById("addressError").innerHTML="Address required";valid=false;}
+
+  return valid;
+}
+
+function sendWhatsApp(){
+  if(!validateForm()) return;
+
+  let message="Royal Luxury Cafe Order:%0A";
+  let total=0;
+  cart.forEach(item=>{
+    message+=`${item.name} x ${item.qty} = ₹${item.price*item.qty}%0A`;
+    total+=item.price*item.qty;
+  });
+
+  message+=`Total: ₹${total}%0A`;
+  message+=`Name: ${name.value}%0APhone: ${phone.value}%0AAddress: ${address.value}`;
+
+  window.open(`https://wa.me/918078619566?text=${message}`,"_blank");
+}
+
+function payNow(){
+  if(!validateForm()) return;
+
+  let total=0;
+  cart.forEach(item=> total+=item.price*item.qty);
+
+  var options={
+    key:"rzp_test_YourKeyHere",
+    amount:total*100,
+    currency:"INR",
+    name:"Royal Luxury Cafe",
+    description:"Order Payment",
+    handler:function(response){
+      alert("Payment Successful!");
+    }
+  };
+
+  var rzp=new Razorpay(options);
+  rzp.open();
+}
+
+loadMenu();
+
+</script>
+
+</body>
+</html>
