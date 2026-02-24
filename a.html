@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Royal Cafe</title>
-
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-
 <style>
 body{margin:0;font-family:Arial;background:#f8f8f8;}
 header{background:#e23744;color:white;padding:15px;text-align:center;font-size:22px;font-weight:bold;}
@@ -51,112 +49,121 @@ header{background:#e23744;color:white;padding:15px;text-align:center;font-size:2
 </div>
 
 <script>
-
-emailjs.init("YOUR_PUBLIC_KEY");
+emailjs.init("jBJYVshxCEY3XG1QF");
 const WHATSAPP="918078619566";
 
-let menuData=JSON.parse(localStorage.getItem("menuData"))||{
-Coffee:[{name:"Hot Coffee",price:120},{name:"Cold Coffee",price:150}],
-Tea:[{name:"Masala Tea",price:40},{name:"Lemon Tea",price:35}]
+// Load menu from localStorage, default if empty
+let menuData = JSON.parse(localStorage.getItem("menuData")) || {
+  Coffee:[{name:"Hot Coffee",price:120},{name:"Cold Coffee",price:150}],
+  Tea:[{name:"Masala Tea",price:40},{name:"Lemon Tea",price:35}]
 };
 
 let currentCategory=Object.keys(menuData)[0];
 let cart=[];
 
+// Load categories
 function loadCategories(){
-let html="";
-for(let cat in menuData){
-html+=`<button onclick="showCategory('${cat}')">${cat}</button>`;
-}
-document.getElementById("categoryBar").innerHTML=html;
+  let html="";
+  for(let cat in menuData){
+    html+=`<button onclick="showCategory('${cat}')">${cat}</button>`;
+  }
+  document.getElementById("categoryBar").innerHTML=html;
 }
 
+// Show selected category
 function showCategory(category){
-currentCategory=category;
-loadMenu();
+  currentCategory=category;
+  loadMenu();
 }
 
+// Load menu items
 function loadMenu(){
-let items=menuData[currentCategory];
-let html="";
-items.forEach((item,i)=>{
-let cartItem=cart.find(c=>c.name===item.name);
-let qty=cartItem?cartItem.qty:0;
-html+=`
-<div class="card">
-<h4>${item.name}</h4>
-<div class="price">₹${item.price}</div>
-<div class="qty-box">
-<button onclick="decrease('${currentCategory}',${i})">-</button>
-<span>${qty}</span>
-<button onclick="increase('${currentCategory}',${i})">+</button>
-</div>
-</div>`;
-});
-document.getElementById("menu").innerHTML=html;
+  let items=menuData[currentCategory];
+  let html="";
+  items.forEach((item,i)=>{
+    let cartItem=cart.find(c=>c.name===item.name);
+    let qty=cartItem?cartItem.qty:0;
+    html+=`
+    <div class="card">
+      <h4>${item.name}</h4>
+      <div class="price">₹${item.price}</div>
+      <div class="qty-box">
+        <button onclick="decrease('${currentCategory}',${i})">-</button>
+        <span>${qty}</span>
+        <button onclick="increase('${currentCategory}',${i})">+</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById("menu").innerHTML=html;
 }
 
+// Increase quantity
 function increase(category,i){
-let item=menuData[category][i];
-let existing=cart.find(x=>x.name===item.name);
-if(existing) existing.qty++;
-else cart.push({...item,qty:1});
-updateCart();
+  let item=menuData[category][i];
+  let existing=cart.find(x=>x.name===item.name);
+  if(existing) existing.qty++;
+  else cart.push({...item,qty:1});
+  updateCart();
 }
 
+// Decrease quantity
 function decrease(category,i){
-let item=menuData[category][i];
-let existing=cart.find(x=>x.name===item.name);
-if(existing){existing.qty--;if(existing.qty<=0){cart=cart.filter(x=>x.name!==item.name);}}
-updateCart();
+  let item=menuData[category][i];
+  let existing=cart.find(x=>x.name===item.name);
+  if(existing){existing.qty--;if(existing.qty<=0){cart=cart.filter(x=>x.name!==item.name);}}
+  updateCart();
 }
 
+// Update cart display
 function updateCart(){
-let html="";let total=0;
-cart.forEach(item=>{
-total+=item.price*item.qty;
-html+=`<div class="cart-item"><span>${item.name} x ${item.qty}</span><span>₹${item.price*item.qty}</span></div>`;
-});
-document.getElementById("cartItems").innerHTML=html;
-document.getElementById("total").innerText="Total: ₹"+total;
-loadMenu();
+  let html=""; let total=0;
+  cart.forEach(item=>{
+    total+=item.price*item.qty;
+    html+=`<div class="cart-item"><span>${item.name} x ${item.qty}</span><span>₹${item.price*item.qty}</span></div>`;
+  });
+  document.getElementById("cartItems").innerHTML=html;
+  document.getElementById("total").innerText="Total: ₹"+total;
+  loadMenu();
 }
 
+// Open order popup
 function openPopup(){
-if(cart.length===0){alert("Cart empty");return;}
-document.getElementById("popup").style.display="flex";
+  if(cart.length===0){alert("Cart empty"); return;}
+  document.getElementById("popup").style.display="flex";
 }
 
+// Generate order ID
 function generateOrderId(name){
-return name.charAt(0).toUpperCase()+"-"+Math.floor(1000+Math.random()*9000);
+  return name.charAt(0).toUpperCase()+"-"+Math.floor(1000+Math.random()*9000);
 }
 
+// Place order
 function placeOrder(){
-let name=document.getElementById("name").value;
-let phone=document.getElementById("phone").value;
-let address=document.getElementById("address").value;
+  let name=document.getElementById("name").value;
+  let phone=document.getElementById("phone").value;
+  let address=document.getElementById("address").value;
 
-if(name===""||phone===""||address===""){
-alert("Fill all details");
-return;
-}
+  if(name===""||phone===""||address===""){
+    alert("Fill all details"); return;
+  }
 
-let orderId=generateOrderId(name);
-let total=0;let orderText="";
-cart.forEach(item=>{total+=item.price*item.qty;orderText+=`${item.name} x ${item.qty}\n`;});
+  let orderId=generateOrderId(name);
+  let total=0; let orderText="";
+  cart.forEach(item=>{total+=item.price*item.qty; orderText+=`${item.name} x ${item.qty}\n`;});
 
-emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{name,phone,address,order:orderText,total,orderId});
+  // Send email
+  emailjs.send("service_yeovzfg","template_e1bte0u",{name,phone,address,order:orderText,total,orderId});
 
-window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Order ID: "+orderId+"\n"+orderText+"Total: ₹"+total)}`);
+  // Open WhatsApp
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Order ID: "+orderId+"\n"+orderText+"Total: ₹"+total)}`);
 
-alert("Order Placed Successfully!");
-cart=[];updateCart();
-document.getElementById("popup").style.display="none";
+  alert("Order Placed Successfully!");
+  cart=[]; updateCart();
+  document.getElementById("popup").style.display="none";
 }
 
 loadCategories();
 loadMenu();
-
 </script>
 </body>
 </html>
