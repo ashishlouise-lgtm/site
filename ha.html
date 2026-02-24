@@ -25,7 +25,7 @@ button{padding:6px 12px;background:#e23744;color:white;border:none;border-radius
 <div id="loginDiv" style="max-width:400px;margin:40px auto;padding:20px;background:#fff;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
 <h3>Admin Login</h3>
 <input id="adminUser" placeholder="Username">
-<input id="adminPass" placeholder="Password" type="password">
+<input id="adminPass" type="password" placeholder="Password">
 <button onclick="adminLogin()">Login</button>
 </div>
 
@@ -40,11 +40,13 @@ button{padding:6px 12px;background:#e23744;color:white;border:none;border-radius
     <div id="adminCategories"></div>
     <input id="newCategory" placeholder="New Category">
     <button onclick="addCategory()">Add Category</button>
+
     <h3>Subcategories</h3>
     <select id="selectCategoryForSubcat"></select>
     <input id="newSubcategory" placeholder="New Subcategory">
     <button onclick="addSubcategory()">Add Subcategory</button>
   </div>
+
   <div class="main">
     <h3>Items</h3>
     <select id="selectCategoryForItem"></select>
@@ -65,7 +67,10 @@ const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "1234";
 
 // --- Shared Menu Data ---
-let menuData = JSON.parse(localStorage.getItem("menuData")) || {};
+let menuData = JSON.parse(localStorage.getItem("menuData")) || {
+    Coffee: [{name:"Hot Coffee",price:120},{name:"Cold Coffee",price:150}],
+    Tea: [{name:"Masala Tea",price:40},{name:"Lemon Tea",price:35}]
+};
 
 // --- Success Message ---
 function showMessage(msg){
@@ -74,17 +79,20 @@ function showMessage(msg){
     setTimeout(()=>{ div.style.opacity="0"; setTimeout(()=>{div.style.display="none";},500)},2000);
 }
 
-// --- Login/Logout ---
+// --- Login / Logout ---
 function adminLogin(){
     let user=document.getElementById("adminUser").value;
     let pass=document.getElementById("adminPass").value;
     if(user===ADMIN_USERNAME && pass===ADMIN_PASSWORD){
         document.getElementById("loginDiv").style.display="none";
         document.getElementById("adminDashboard").style.display="block";
-        showMessage("Welcome Admin ✅");
+        showMessage("Login Successful ✅");
         loadDashboard();
-    } else showMessage("Invalid credentials ❌");
+    } else {
+        showMessage("Invalid credentials ❌");
+    }
 }
+
 function adminLogout(){
     document.getElementById("loginDiv").style.display="block";
     document.getElementById("adminDashboard").style.display="none";
@@ -93,7 +101,8 @@ function adminLogout(){
 
 // --- Dashboard Functions ---
 function loadDashboard(){
-    loadCategories(); renderManage(); loadAdminDropdowns();
+    loadCategories();
+    renderManage();
 }
 
 // --- Load Categories ---
@@ -103,7 +112,9 @@ function loadCategories(){
     const catSub=document.getElementById("selectCategoryForSubcat");
     catDiv.innerHTML=""; selectCat.innerHTML=""; catSub.innerHTML="";
     for(let cat in menuData){
-        let div=document.createElement("div"); div.className="card"; div.innerText=cat; div.onclick=()=>{renderSubcategories(cat);}
+        let div=document.createElement("div");
+        div.className="card"; div.innerText=cat;
+        div.onclick=()=>{renderSubcategories(cat);}
         catDiv.appendChild(div);
         let opt=document.createElement("option"); opt.value=cat; opt.innerText=cat;
         selectCat.appendChild(opt);
@@ -123,38 +134,60 @@ function renderSubcategories(cat){
     }
 }
 
-// --- Add Category/Subcategory/Item ---
-function saveData(){localStorage.setItem("menuData",JSON.stringify(menuData)); showMessage("Saved ✅"); loadDashboard();}
-function addCategory(){
-    let name=document.getElementById("newCategory").value.trim(); if(!name) return showMessage("Enter category");
-    if(menuData[name]) return showMessage("Already exists");
-    menuData[name]={}; document.getElementById("newCategory").value=""; saveData();
+// --- Add / Save Functions ---
+function saveData(){
+    localStorage.setItem("menuData",JSON.stringify(menuData));
+    showMessage("Saved ✅");
+    loadDashboard();
 }
+
+function addCategory(){
+    let name=document.getElementById("newCategory").value.trim();
+    if(!name) return showMessage("Enter category");
+    if(menuData[name]) return showMessage("Already exists");
+    menuData[name]={};
+    document.getElementById("newCategory").value="";
+    saveData();
+}
+
 function addSubcategory(){
     let cat=document.getElementById("selectCategoryForSubcat").value;
-    let sub=document.getElementById("newSubcategory").value.trim(); if(!sub) return showMessage("Enter subcategory");
+    let sub=document.getElementById("newSubcategory").value.trim();
+    if(!sub) return showMessage("Enter subcategory");
     if(menuData[cat][sub]) return showMessage("Already exists");
-    menuData[cat][sub]=[]; document.getElementById("newSubcategory").value=""; saveData();
+    menuData[cat][sub]=[];
+    document.getElementById("newSubcategory").value="";
+    saveData();
 }
+
 function addItem(){
     let cat=document.getElementById("selectCategoryForItem").value;
     let sub=document.getElementById("selectSubcategoryForItem").value;
     let name=document.getElementById("newItemName").value.trim();
     let price=parseFloat(document.getElementById("newItemPrice").value);
     if(!name||!price) return showMessage("Enter name & price");
-    menuData[cat][sub].push({name,price}); document.getElementById("newItemName").value=""; document.getElementById("newItemPrice").value="";
-    saveData(); renderManage(); showMessage("Item added ✅");
+    menuData[cat][sub].push({name,price});
+    document.getElementById("newItemName").value="";
+    document.getElementById("newItemPrice").value="";
+    saveData();
+    renderManage();
+    showMessage("Item added ✅");
 }
 
 // --- Render Manage Section ---
 function renderManage(){
-    const container=document.getElementById("adminManage"); container.innerHTML="";
+    const container=document.getElementById("adminManage");
+    container.innerHTML="";
     for(let cat in menuData){
         for(let sub in menuData[cat]){
             menuData[cat][sub].forEach((item,i)=>{
-                let div=document.createElement("div"); div.className="card";
-                let spanText=document.createElement("span"); spanText.innerText=`${cat} > ${sub} > ${item.name} - ₹${item.price}`;
-                let delBtn=document.createElement("button"); delBtn.innerText="Delete"; delBtn.onclick=()=>deleteItem(cat,sub,i);
+                let div=document.createElement("div");
+                div.className="card";
+                let spanText=document.createElement("span");
+                spanText.innerText=`${cat} > ${sub} > ${item.name} - ₹${item.price}`;
+                let delBtn=document.createElement("button");
+                delBtn.innerText="Delete";
+                delBtn.onclick=()=>deleteItem(cat,sub,i);
                 div.appendChild(spanText); div.appendChild(delBtn);
                 container.appendChild(div);
             });
@@ -164,10 +197,12 @@ function renderManage(){
 
 // --- Delete Item ---
 function deleteItem(cat,sub,index){
-    if(confirm("Delete item?")){menuData[cat][sub].splice(index,1); saveData(); renderManage();}
+    if(confirm("Delete item?")){
+        menuData[cat][sub].splice(index,1);
+        saveData();
+        renderManage();
+    }
 }
-
-// --- Admin Dashboard Initialize ---
 </script>
 
 </body>
