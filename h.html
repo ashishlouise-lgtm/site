@@ -1,106 +1,122 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Royal Luxury Café</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
 body{
-  font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg,#000,#1a1a1a);
-  color:#fff;
+background:#0f0f0f;
+color:white;
 }
+
 header{
-  text-align:center;
-  padding:25px;
-  font-family:'Playfair Display',serif;
-  font-size:32px;
-  color:#d4af37;
+text-align:center;
+padding:20px;
+font-size:28px;
+font-weight:600;
+color:#d4af37;
+background:black;
 }
-.container{max-width:1100px;margin:auto;padding:20px;}
-.category{margin-top:40px;}
-.category h2{color:#d4af37;margin-bottom:10px;}
+
+.container{
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+
+.category{
+margin-top:40px;
+}
+
+.category h2{
+color:#d4af37;
+margin-bottom:10px;
+}
+
 .item{
-  background:#111;
-  padding:15px;
-  border-radius:12px;
-  margin:10px 0;
-  display:flex;
-  justify-content:space-between;
-  box-shadow:0 0 15px rgba(212,175,55,0.3);
+background:#1a1a1a;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
+
 .item button{
-  background:#d4af37;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
+background:#d4af37;
+border:none;
+padding:6px 12px;
+border-radius:5px;
+cursor:pointer;
 }
 
 .cart{
-  position:fixed;
-  right:20px;
-  top:100px;
-  width:350px;
-  background:#111;
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 0 30px rgba(212,175,55,0.4);
+position:fixed;
+right:20px;
+top:90px;
+width:320px;
+background:#111;
+padding:20px;
+border-radius:15px;
+box-shadow:0 0 20px rgba(212,175,55,0.3);
 }
-.cart h3{color:#d4af37;}
-.cart-item{margin-bottom:8px;}
+
+.cart h3{
+color:#d4af37;
+margin-bottom:10px;
+}
+
 .qty-btn{
-  background:#d4af37;
-  border:none;
-  padding:2px 6px;
-  margin:0 3px;
-  border-radius:5px;
-  cursor:pointer;
+background:#d4af37;
+border:none;
+padding:3px 6px;
+margin:0 3px;
+border-radius:4px;
+cursor:pointer;
 }
+
 .total{
-  margin-top:10px;
-  font-weight:bold;
-  color:#d4af37;
+margin-top:10px;
+font-weight:600;
+color:#d4af37;
 }
 
 input,textarea{
-  width:100%;
-  margin-top:8px;
-  padding:8px;
-  border-radius:6px;
-  border:none;
+width:100%;
+margin-top:8px;
+padding:8px;
+border-radius:6px;
+border:none;
 }
 
-.whatsapp-btn,.pay-btn{
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
+button.main-btn{
+width:100%;
+margin-top:10px;
+padding:10px;
+border:none;
+border-radius:6px;
+font-weight:600;
+cursor:pointer;
 }
-.whatsapp-btn{background:#25D366;}
-.pay-btn{background:#d4af37;}
 
-.error{
-  color:red;
-  font-size:12px;
-}
+.whatsapp{background:#25D366;}
+.error{color:red;font-size:12px;}
 
 @media(max-width:768px){
-  .cart{
-    position:relative;
-    width:100%;
-    top:0;
-    right:0;
-    margin-top:30px;
-  }
+.cart{
+position:relative;
+width:100%;
+top:0;
+right:0;
+margin-top:30px;
+}
 }
 </style>
 </head>
@@ -111,140 +127,147 @@ input,textarea{
 <div class="container" id="menu"></div>
 
 <div class="cart">
-  <h3>Your Order</h3>
-  <div id="cartItems"></div>
-  <div class="total" id="total"></div>
+<h3>Your Order</h3>
+<div id="cartItems"></div>
+<div class="total" id="total">Total: ₹0</div>
 
-  <h3 style="margin-top:15px;">Customer Details</h3>
-  <input type="text" id="name" placeholder="Full Name">
-  <div class="error" id="nameError"></div>
+<h3 style="margin-top:15px;">Customer Details</h3>
 
-  <input type="text" id="phone" placeholder="Phone Number">
-  <div class="error" id="phoneError"></div>
+<input type="text" id="name" placeholder="Full Name">
+<div class="error" id="nameError"></div>
 
-  <textarea id="address" placeholder="Full Address"></textarea>
-  <div class="error" id="addressError"></div>
+<input type="text" id="phone" placeholder="Phone (10 digit)">
+<div class="error" id="phoneError"></div>
 
-  <button class="whatsapp-btn" onclick="sendWhatsApp()">Order on WhatsApp</button>
-  <button class="pay-btn" onclick="payNow()">Pay with Razorpay</button>
+<textarea id="address" placeholder="Full Address"></textarea>
+<div class="error" id="addressError"></div>
+
+<button class="main-btn whatsapp" onclick="sendWhatsApp()">Order on WhatsApp</button>
+
 </div>
 
 <script>
 
+const WHATSAPP_NUMBER = "918078619566"; // apna number yaha daalo
+
 const menu=[
-  {category:"Coffee",name:"Cappuccino",price:120},
-  {category:"Coffee",name:"Latte",price:140},
-  {category:"Fast Food",name:"Burger",price:100},
-  {category:"Fast Food",name:"Pizza",price:250}
+{category:"Coffee",name:"Cappuccino",price:120},
+{category:"Coffee",name:"Latte",price:140},
+{category:"Fast Food",name:"Burger",price:100},
+{category:"Fast Food",name:"Pizza",price:250}
 ];
 
 let cart=[];
 
 function loadMenu(){
-  const container=document.getElementById("menu");
-  const categories=[...new Set(menu.map(i=>i.category))];
+const container=document.getElementById("menu");
+const categories=[...new Set(menu.map(i=>i.category))];
 
-  categories.forEach(cat=>{
-    container.innerHTML+=`<div class="category"><h2>${cat}</h2><div id="${cat}"></div></div>`;
-    const catDiv=document.getElementById(cat);
+categories.forEach(cat=>{
+container.innerHTML+=`<div class="category"><h2>${cat}</h2><div id="${cat}"></div></div>`;
+const catDiv=document.getElementById(cat);
 
-    menu.filter(i=>i.category===cat).forEach((item,index)=>{
-      catDiv.innerHTML+=`
-      <div class="item">
-        <div>${item.name} - ₹${item.price}</div>
-        <button onclick="addToCart(${index})">Add</button>
-      </div>`;
-    });
-  });
+menu.filter(i=>i.category===cat).forEach((item,index)=>{
+catDiv.innerHTML+=`
+<div class="item">
+<div>${item.name} - ₹${item.price}</div>
+<button onclick="addToCart(${index})">Add</button>
+</div>`;
+});
+});
 }
 
 function addToCart(index){
-  const existing=cart.find(i=>i.name===menu[index].name);
-  if(existing) existing.qty++;
-  else cart.push({...menu[index],qty:1});
-  updateCart();
+const existing=cart.find(i=>i.name===menu[index].name);
+if(existing) existing.qty++;
+else cart.push({...menu[index],qty:1});
+updateCart();
 }
 
 function changeQty(name,change){
-  const item=cart.find(i=>i.name===name);
-  item.qty+=change;
-  if(item.qty<=0) cart=cart.filter(i=>i.name!==name);
-  updateCart();
+const item=cart.find(i=>i.name===name);
+item.qty+=change;
+if(item.qty<=0) cart=cart.filter(i=>i.name!==name);
+updateCart();
 }
 
 function updateCart(){
-  const cartDiv=document.getElementById("cartItems");
-  const totalDiv=document.getElementById("total");
-  cartDiv.innerHTML="";
-  let total=0;
+const cartDiv=document.getElementById("cartItems");
+let total=0;
+cartDiv.innerHTML="";
 
-  cart.forEach(item=>{
-    total+=item.price*item.qty;
-    cartDiv.innerHTML+=`
-    <div class="cart-item">
-      ${item.name}
-      <button class="qty-btn" onclick="changeQty('${item.name}',-1)">-</button>
-      ${item.qty}
-      <button class="qty-btn" onclick="changeQty('${item.name}',1)">+</button>
-      = ₹${item.price*item.qty}
-    </div>`;
-  });
+cart.forEach(item=>{
+total+=item.price*item.qty;
+cartDiv.innerHTML+=`
+<div>
+${item.name}
+<button class="qty-btn" onclick="changeQty('${item.name}',-1)">-</button>
+${item.qty}
+<button class="qty-btn" onclick="changeQty('${item.name}',1)">+</button>
+= ₹${item.price*item.qty}
+</div>`;
+});
 
-  totalDiv.innerHTML="Total: ₹"+total;
+document.getElementById("total").innerHTML="Total: ₹"+total;
 }
 
 function validateForm(){
-  let valid=true;
-  const name=document.getElementById("name").value.trim();
-  const phone=document.getElementById("phone").value.trim();
-  const address=document.getElementById("address").value.trim();
 
-  document.getElementById("nameError").innerHTML="";
-  document.getElementById("phoneError").innerHTML="";
-  document.getElementById("addressError").innerHTML="";
+let valid=true;
 
-  if(name===""){document.getElementById("nameError").innerHTML="Name required";valid=false;}
-  if(phone==="" || phone.length!=10){document.getElementById("phoneError").innerHTML="Valid 10 digit phone required";valid=false;}
-  if(address===""){document.getElementById("addressError").innerHTML="Address required";valid=false;}
+const name=document.getElementById("name").value.trim();
+const phone=document.getElementById("phone").value.trim();
+const address=document.getElementById("address").value.trim();
 
-  return valid;
+document.getElementById("nameError").innerHTML="";
+document.getElementById("phoneError").innerHTML="";
+document.getElementById("addressError").innerHTML="";
+
+if(name===""){
+document.getElementById("nameError").innerHTML="Name required";
+valid=false;
+}
+
+if(!/^[0-9]{10}$/.test(phone)){
+document.getElementById("phoneError").innerHTML="Valid 10 digit phone required";
+valid=false;
+}
+
+if(address===""){
+document.getElementById("addressError").innerHTML="Address required";
+valid=false;
+}
+
+if(cart.length===0){
+alert("Cart is empty!");
+valid=false;
+}
+
+return valid;
 }
 
 function sendWhatsApp(){
-  if(!validateForm()) return;
 
-  let message="Royal Luxury Cafe Order:%0A";
-  let total=0;
-  cart.forEach(item=>{
-    message+=`${item.name} x ${item.qty} = ₹${item.price*item.qty}%0A`;
-    total+=item.price*item.qty;
-  });
+if(!validateForm()) return;
 
-  message+=`Total: ₹${total}%0A`;
-  message+=`Name: ${name.value}%0APhone: ${phone.value}%0AAddress: ${address.value}`;
+let name=document.getElementById("name").value.trim();
+let phone=document.getElementById("phone").value.trim();
+let address=document.getElementById("address").value.trim();
 
-  window.open(`https://wa.me/918078619566?text=${message}`;
-}
+let message="Royal Luxury Cafe Order:\n";
+let total=0;
 
-function payNow(){
-  if(!validateForm()) return;
+cart.forEach(item=>{
+message+=`${item.name} x ${item.qty} = ₹${item.price*item.qty}\n`;
+total+=item.price*item.qty;
+});
 
-  let total=0;
-  cart.forEach(item=> total+=item.price*item.qty);
+message+=`Total: ₹${total}\n\n`;
+message+=`Customer Name: ${name}\nPhone: ${phone}\nAddress: ${address}`;
 
-  var options={
-    key:"rzp_test_YourKeyHere",
-    amount:total*100,
-    currency:"INR",
-    name:"Royal Luxury Cafe",
-    description:"Order Payment",
-    handler:function(response){
-      alert("Payment Successful!");
-    }
-  };
+let encodedMessage=encodeURIComponent(message);
 
-  var rzp=new Razorpay(options);
-  rzp.open();
+window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,"_blank");
 }
 
 loadMenu();
