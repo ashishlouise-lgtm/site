@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+<style>
+body{font-family:Arial;background:#111;color:white;padding:20px;}
+input{width:100%;padding:8px;margin-top:8px;}
+button{margin-top:8px;padding:8px;background:#e23744;color:white;border:none;}
+.success{color:lime;}
+.error{color:red;}
+</style>
+</head>
+<body>
+
+<h2>Admin Login</h2>
+<input type="password" id="pass" placeholder="Enter Password">
+<button onclick="login()">Login</button>
+<p id="msg"></p>
+
+<div id="panel" style="display:none;">
+<h3>Add Category</h3>
+<input id="catName" placeholder="Category Name">
+<button onclick="addCategory()">Add</button>
+
+<h3>Add Item</h3>
+<input id="itemCat" placeholder="Category">
+<input id="itemName" placeholder="Item Name">
+<input id="itemPrice" placeholder="Price">
+<button onclick="addItem()">Add Item</button>
+</div>
+
+<script>
+
+function login(){
+if(document.getElementById("pass").value==="admin123"){
+document.getElementById("panel").style.display="block";
+msg.innerHTML="Login Successful";
+msg.className="success";
+}else{
+msg.innerHTML="Wrong Password";
+msg.className="error";
+}
+}
+
+function addCategory(){
+let data=JSON.parse(localStorage.getItem("menuData"))||{};
+let name=catName.value;
+if(!data[name]){data[name]=[];}
+localStorage.setItem("menuData",JSON.stringify(data));
+msg.innerHTML="Category Added Successfully";
+msg.className="success";
+}
+
+function addItem(){
+let data=JSON.parse(localStorage.getItem("menuData"))||{};
+let cat=itemCat.value;
+let name=itemName.value;
+let price=Number(itemPrice.value);
+if(data[cat]){
+data[cat].push({name,price});
+localStorage.setItem("menuData",JSON.stringify(data));
+msg.innerHTML="Item Added Successfully";
+msg.className="success";
+}else{
+msg.innerHTML="Category Not Found";
+msg.className="error";
+}
+}
+
+</script>
+</body>
+</html>
