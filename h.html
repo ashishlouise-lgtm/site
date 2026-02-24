@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -6,88 +6,37 @@
 <title>Royal Luxury Café</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#0f0f0f;color:white;}
+header{text-align:center;padding:20px;font-size:28px;color:#d4af37;background:black;}
+.container{max-width:1000px;margin:auto;padding:20px;}
+.item{background:#1a1a1a;padding:15px;margin:10px 0;border-radius:10px;display:flex;justify-content:space-between;}
+.item button{background:#d4af37;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;}
 
-body{
-background:#0f0f0f;
-color:white;
-}
+.cart{position:fixed;right:20px;top:100px;width:320px;background:#111;padding:20px;border-radius:15px;}
+.total{color:#d4af37;margin-top:10px;font-weight:600;}
+button.main{width:100%;margin-top:10px;padding:10px;border:none;border-radius:6px;font-weight:600;cursor:pointer;}
+.checkout{background:#d4af37;}
+.qty-btn{background:#d4af37;border:none;padding:3px 6px;margin:0 3px;border-radius:4px;}
 
-header{
-text-align:center;
-padding:20px;
-font-size:28px;
-font-weight:600;
-color:#d4af37;
-background:black;
-}
-
-.container{
-max-width:1000px;
-margin:auto;
-padding:20px;
-}
-
-.category{
-margin-top:40px;
-}
-
-.category h2{
-color:#d4af37;
-margin-bottom:10px;
-}
-
-.item{
-background:#1a1a1a;
-padding:15px;
-margin:10px 0;
-border-radius:10px;
-display:flex;
-justify-content:space-between;
+.modal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.8);
+justify-content:center;
 align-items:center;
 }
-
-.item button{
-background:#d4af37;
-border:none;
-padding:6px 12px;
-border-radius:5px;
-cursor:pointer;
-}
-
-.cart{
-position:fixed;
-right:20px;
-top:90px;
-width:320px;
+.modal-content{
 background:#111;
 padding:20px;
-border-radius:15px;
-box-shadow:0 0 20px rgba(212,175,55,0.3);
+width:300px;
+border-radius:10px;
 }
-
-.cart h3{
-color:#d4af37;
-margin-bottom:10px;
-}
-
-.qty-btn{
-background:#d4af37;
-border:none;
-padding:3px 6px;
-margin:0 3px;
-border-radius:4px;
-cursor:pointer;
-}
-
-.total{
-margin-top:10px;
-font-weight:600;
-color:#d4af37;
-}
-
 input,textarea{
 width:100%;
 margin-top:8px;
@@ -95,28 +44,10 @@ padding:8px;
 border-radius:6px;
 border:none;
 }
-
-button.main-btn{
-width:100%;
-margin-top:10px;
-padding:10px;
-border:none;
-border-radius:6px;
-font-weight:600;
-cursor:pointer;
-}
-
-.whatsapp{background:#25D366;}
 .error{color:red;font-size:12px;}
 
 @media(max-width:768px){
-.cart{
-position:relative;
-width:100%;
-top:0;
-right:0;
-margin-top:30px;
-}
+.cart{position:relative;width:100%;top:0;margin-top:20px;}
 }
 </style>
 </head>
@@ -130,50 +61,49 @@ margin-top:30px;
 <h3>Your Order</h3>
 <div id="cartItems"></div>
 <div class="total" id="total">Total: ₹0</div>
+<button class="main checkout" onclick="openModal()">Checkout</button>
+</div>
 
-<h3 style="margin-top:15px;">Customer Details</h3>
+<!-- Popup Modal -->
+<div class="modal" id="modal">
+<div class="modal-content">
+<h3>Customer Details</h3>
 
 <input type="text" id="name" placeholder="Full Name">
 <div class="error" id="nameError"></div>
 
-<input type="text" id="phone" placeholder="Phone (10 digit)">
+<input type="text" id="phone" placeholder="Phone">
 <div class="error" id="phoneError"></div>
 
-<textarea id="address" placeholder="Full Address"></textarea>
+<textarea id="address" placeholder="Address"></textarea>
 <div class="error" id="addressError"></div>
 
-<button class="main-btn whatsapp" onclick="sendWhatsApp()">Order on WhatsApp</button>
-
+<button class="main checkout" onclick="placeOrder()">Place Order</button>
+</div>
 </div>
 
 <script>
+emailjs.init("YOUR_PUBLIC_KEY"); // yaha apna Public Key daalo
 
-const WHATSAPP_NUMBER = "918078619566"; // apna number yaha daalo
+const WHATSAPP_NUMBER="918078619566";
 
 const menu=[
-{category:"Coffee",name:"Cappuccino",price:120},
-{category:"Coffee",name:"Latte",price:140},
-{category:"Fast Food",name:"Burger",price:100},
-{category:"Fast Food",name:"Pizza",price:250}
+{name:"Cappuccino",price:120},
+{name:"Latte",price:140},
+{name:"Burger",price:100},
+{name:"Pizza",price:250}
 ];
 
 let cart=[];
 
 function loadMenu(){
 const container=document.getElementById("menu");
-const categories=[...new Set(menu.map(i=>i.category))];
-
-categories.forEach(cat=>{
-container.innerHTML+=`<div class="category"><h2>${cat}</h2><div id="${cat}"></div></div>`;
-const catDiv=document.getElementById(cat);
-
-menu.filter(i=>i.category===cat).forEach((item,index)=>{
-catDiv.innerHTML+=`
+menu.forEach((item,index)=>{
+container.innerHTML+=`
 <div class="item">
 <div>${item.name} - ₹${item.price}</div>
 <button onclick="addToCart(${index})">Add</button>
 </div>`;
-});
 });
 }
 
@@ -192,10 +122,9 @@ updateCart();
 }
 
 function updateCart(){
-const cartDiv=document.getElementById("cartItems");
 let total=0;
+const cartDiv=document.getElementById("cartItems");
 cartDiv.innerHTML="";
-
 cart.forEach(item=>{
 total+=item.price*item.qty;
 cartDiv.innerHTML+=`
@@ -204,17 +133,18 @@ ${item.name}
 <button class="qty-btn" onclick="changeQty('${item.name}',-1)">-</button>
 ${item.qty}
 <button class="qty-btn" onclick="changeQty('${item.name}',1)">+</button>
-= ₹${item.price*item.qty}
 </div>`;
 });
-
 document.getElementById("total").innerHTML="Total: ₹"+total;
 }
 
-function validateForm(){
+function openModal(){
+if(cart.length===0){alert("Cart empty");return;}
+document.getElementById("modal").style.display="flex";
+}
 
+function validate(){
 let valid=true;
-
 const name=document.getElementById("name").value.trim();
 const phone=document.getElementById("phone").value.trim();
 const address=document.getElementById("address").value.trim();
@@ -223,55 +153,44 @@ document.getElementById("nameError").innerHTML="";
 document.getElementById("phoneError").innerHTML="";
 document.getElementById("addressError").innerHTML="";
 
-if(name===""){
-document.getElementById("nameError").innerHTML="Name required";
-valid=false;
-}
-
-if(!/^[0-9]{10}$/.test(phone)){
-document.getElementById("phoneError").innerHTML="Valid 10 digit phone required";
-valid=false;
-}
-
-if(address===""){
-document.getElementById("addressError").innerHTML="Address required";
-valid=false;
-}
-
-if(cart.length===0){
-alert("Cart is empty!");
-valid=false;
-}
+if(name===""){document.getElementById("nameError").innerHTML="Required";valid=false;}
+if(!/^[0-9]{10}$/.test(phone)){document.getElementById("phoneError").innerHTML="10 digit required";valid=false;}
+if(address===""){document.getElementById("addressError").innerHTML="Required";valid=false;}
 
 return valid;
 }
 
-function sendWhatsApp(){
+function placeOrder(){
+if(!validate()) return;
 
-if(!validateForm()) return;
-
-let name=document.getElementById("name").value.trim();
-let phone=document.getElementById("phone").value.trim();
-let address=document.getElementById("address").value.trim();
-
-let message="Royal Luxury Cafe Order:\n";
 let total=0;
-
+let orderText="";
 cart.forEach(item=>{
-message+=`${item.name} x ${item.qty} = ₹${item.price*item.qty}\n`;
 total+=item.price*item.qty;
+orderText+=`${item.name} x ${item.qty}\n`;
 });
 
-message+=`Total: ₹${total}\n\n`;
-message+=`Customer Name: ${name}\nPhone: ${phone}\nAddress: ${address}`;
+// 1️⃣ Send Email (Customer info + order)
+emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
+name:name.value,
+phone:phone.value,
+address:address.value,
+order:orderText,
+total:total
+});
 
-let encodedMessage=encodeURIComponent(message);
+// 2️⃣ WhatsApp (Only order items)
+let message=`Royal Luxury Cafe Order:\n${orderText}Total: ₹${total}`;
+window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,"_blank");
 
-window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,"_blank");
+// reset
+cart=[];
+updateCart();
+document.getElementById("modal").style.display="none";
+alert("Order Placed Successfully!");
 }
 
 loadMenu();
-
 </script>
 
 </body>
