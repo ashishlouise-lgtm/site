@@ -3,165 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Luxury Café</title>
+<title>Royal Cafe</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{background:#0f0f0f;color:white;}
-header{text-align:center;padding:20px;font-size:28px;color:#d4af37;background:black;}
-.container{max-width:1000px;margin:auto;padding:20px;}
-.item{background:#1a1a1a;padding:15px;margin:10px 0;border-radius:10px;display:flex;justify-content:space-between;}
-.item button{background:#d4af37;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;}
-
-.cart{position:fixed;right:20px;top:100px;width:320px;background:#111;padding:20px;border-radius:15px;}
-.total{color:#d4af37;margin-top:10px;font-weight:600;}
-button.main{width:100%;margin-top:10px;padding:10px;border:none;border-radius:6px;font-weight:600;cursor:pointer;}
-.checkout{background:#d4af37;}
-.qty-btn{background:#d4af37;border:none;padding:3px 6px;margin:0 3px;border-radius:4px;}
-
-.modal{
-display:none;
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:rgba(0,0,0,0.8);
-justify-content:center;
+body{
+font-family:Arial;
+background:#0f0f0f;
+color:white;
+padding:20px;
+}
+h1{text-align:center;color:#d4af37;}
+.item{
+background:#1a1a1a;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+display:flex;
+justify-content:space-between;
 align-items:center;
 }
-.modal-content{
-background:#111;
-padding:20px;
-width:300px;
-border-radius:10px;
+button{
+background:#d4af37;
+border:none;
+padding:6px 12px;
+border-radius:5px;
+cursor:pointer;
+}
+.cart{
+margin-top:20px;
+background:#1a1a1a;
+padding:15px;
+border-radius:8px;
 }
 input,textarea{
 width:100%;
 margin-top:8px;
 padding:8px;
-border-radius:6px;
+border-radius:5px;
 border:none;
 }
 .error{color:red;font-size:12px;}
-
-@media(max-width:768px){
-.cart{position:relative;width:100%;top:0;margin-top:20px;}
-}
+.total{color:#d4af37;font-weight:bold;}
 </style>
 </head>
 <body>
 
-<header>Royal Luxury Café ☕</header>
+<h1>Royal Cafe ☕</h1>
 
-<div class="container" id="menu"></div>
+<div id="menu"></div>
 
 <div class="cart">
-<h3>Your Order</h3>
+<h3>Your Cart</h3>
 <div id="cartItems"></div>
-<div class="total" id="total">Total: ₹0</div>
-<button class="main checkout" onclick="openModal()">Checkout</button>
-</div>
+<p class="total" id="total">Total: ₹0</p>
 
-<!-- Popup Modal -->
-<div class="modal" id="modal">
-<div class="modal-content">
 <h3>Customer Details</h3>
+<input id="name" placeholder="Full Name">
+<div id="nameError" class="error"></div>
 
-<input type="text" id="name" placeholder="Full Name">
-<div class="error" id="nameError"></div>
-
-<input type="text" id="phone" placeholder="Phone">
-<div class="error" id="phoneError"></div>
+<input id="phone" placeholder="Phone">
+<div id="phoneError" class="error"></div>
 
 <textarea id="address" placeholder="Address"></textarea>
-<div class="error" id="addressError"></div>
+<div id="addressError" class="error"></div>
 
-<button class="main checkout" onclick="placeOrder()">Place Order</button>
-</div>
+<button onclick="placeOrder()">Place Order</button>
 </div>
 
 <script>
-emailjs.init("YOUR_PUBLIC_KEY"); // yaha apna Public Key daalo
 
-const WHATSAPP_NUMBER="918078619566";
+emailjs.init("YOUR_PUBLIC_KEY");
 
-const menu=[
+const WHATSAPP="918078619566";
+
+let menu=JSON.parse(localStorage.getItem("menu"))||[
 {name:"Cappuccino",price:120},
 {name:"Latte",price:140},
-{name:"Burger",price:100},
-{name:"Pizza",price:250}
+{name:"Burger",price:100}
 ];
 
 let cart=[];
 
 function loadMenu(){
-const container=document.getElementById("menu");
-menu.forEach((item,index)=>{
-container.innerHTML+=`
+let html="";
+menu.forEach((item,i)=>{
+html+=`
 <div class="item">
-<div>${item.name} - ₹${item.price}</div>
-<button onclick="addToCart(${index})">Add</button>
+<span>${item.name} - ₹${item.price}</span>
+<button onclick="addToCart(${i})">Add</button>
 </div>`;
 });
+document.getElementById("menu").innerHTML=html;
 }
 
-function addToCart(index){
-const existing=cart.find(i=>i.name===menu[index].name);
+function addToCart(i){
+let existing=cart.find(x=>x.name===menu[i].name);
 if(existing) existing.qty++;
-else cart.push({...menu[index],qty:1});
-updateCart();
-}
-
-function changeQty(name,change){
-const item=cart.find(i=>i.name===name);
-item.qty+=change;
-if(item.qty<=0) cart=cart.filter(i=>i.name!==name);
+else cart.push({...menu[i],qty:1});
 updateCart();
 }
 
 function updateCart(){
+let html="";
 let total=0;
-const cartDiv=document.getElementById("cartItems");
-cartDiv.innerHTML="";
 cart.forEach(item=>{
 total+=item.price*item.qty;
-cartDiv.innerHTML+=`
-<div>
-${item.name}
-<button class="qty-btn" onclick="changeQty('${item.name}',-1)">-</button>
-${item.qty}
-<button class="qty-btn" onclick="changeQty('${item.name}',1)">+</button>
-</div>`;
+html+=`<p>${item.name} x ${item.qty}</p>`;
 });
-document.getElementById("total").innerHTML="Total: ₹"+total;
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="Total: ₹"+total;
 }
 
-function openModal(){
-if(cart.length===0){alert("Cart empty");return;}
-document.getElementById("modal").style.display="flex";
+function generateOrderId(name){
+let initials=name.split(" ").map(n=>n[0]).join("").toUpperCase();
+let random=Math.floor(1000+Math.random()*9000);
+return initials+"-"+random;
 }
 
 function validate(){
 let valid=true;
-const name=document.getElementById("name").value.trim();
-const phone=document.getElementById("phone").value.trim();
-const address=document.getElementById("address").value.trim();
+let name=document.getElementById("name").value.trim();
+let phone=document.getElementById("phone").value.trim();
+let address=document.getElementById("address").value.trim();
 
-document.getElementById("nameError").innerHTML="";
-document.getElementById("phoneError").innerHTML="";
-document.getElementById("addressError").innerHTML="";
+nameError.innerHTML="";
+phoneError.innerHTML="";
+addressError.innerHTML="";
 
-if(name===""){document.getElementById("nameError").innerHTML="Required";valid=false;}
-if(!/^[0-9]{10}$/.test(phone)){document.getElementById("phoneError").innerHTML="10 digit required";valid=false;}
-if(address===""){document.getElementById("addressError").innerHTML="Required";valid=false;}
+if(name===""){nameError.innerHTML="Required";valid=false;}
+if(!/^[0-9]{10}$/.test(phone)){phoneError.innerHTML="10 digit required";valid=false;}
+if(address===""){addressError.innerHTML="Required";valid=false;}
+if(cart.length===0){alert("Cart empty");valid=false;}
 
 return valid;
 }
 
 function placeOrder(){
+
 if(!validate()) return;
+
+let name=document.getElementById("name").value;
+let phone=document.getElementById("phone").value;
+let address=document.getElementById("address").value;
+
+let orderId=generateOrderId(name);
 
 let total=0;
 let orderText="";
@@ -170,28 +157,28 @@ total+=item.price*item.qty;
 orderText+=`${item.name} x ${item.qty}\n`;
 });
 
-// 1️⃣ Send Email (Customer info + order)
+// Save Order in localStorage (for Admin)
+let orders=JSON.parse(localStorage.getItem("orders"))||[];
+orders.push({orderId,name,phone,address,items:orderText,total});
+localStorage.setItem("orders",JSON.stringify(orders));
+
+// Email
 emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
-name:name.value,
-phone:phone.value,
-address:address.value,
-order:orderText,
-total:total
+name,phone,address,order:orderText,total,orderId
 });
 
-// 2️⃣ WhatsApp (Only order items)
-let message=`Royal Luxury Cafe Order:\n${orderText}Total: ₹${total}`;
-window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,"_blank");
+// WhatsApp (only order)
+let message=`Order ID: ${orderId}\n${orderText}Total: ₹${total}`;
+window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`);
 
-// reset
+alert("Order Placed! ID: "+orderId);
+
 cart=[];
 updateCart();
-document.getElementById("modal").style.display="none";
-alert("Order Placed Successfully!");
 }
 
 loadMenu();
-</script>
 
+</script>
 </body>
 </html>
