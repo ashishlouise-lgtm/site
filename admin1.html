@@ -1,88 +1,23 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrushersCafe Admin Pro</title>
-    <style>
-        :root { --gold: #D4AF37; --black: #000; --card: #121212; }
-        body { font-family: sans-serif; background: var(--black); color: white; padding: 15px; padding-bottom: 100px; }
-        .category-header { background: var(--gold); color: black; padding: 15px; cursor: pointer; font-weight: bold; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; }
-        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: var(--card); }
-        .category-content.open { max-height: 1000px; padding: 10px; border: 1px solid #333; }
-        .item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; align-items: center; }
-        .qty-btn { background: var(--gold); border: none; width: 30px; height: 30px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .footer-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; border-top: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
-        #adminLayer { display:none; position:fixed; top:2%; left:2%; right:2%; bottom:2%; background:#111; border:2px solid var(--gold); padding:15px; z-index:9999; overflow-y:auto; border-radius:12px; }
-        input, select { width:100%; padding:10px; margin: 10px 0; background:#222; color:white; border:1px solid var(--gold); }
-    </style>
+<title>Test</title>
 </head>
 <body>
 
-    <h2 style="text-align:center; color:var(--gold);">⚜️ CRUSHERS CAFE ⚜️</h2>
-    <div id="menu-container">Loading Menu...</div>
+<h2>Sheet Test</h2>
+<pre id="output"></pre>
 
-    <div class="footer-bar">
-        <span>Total: ₹<span id="grand-total">0</span></span>
-        <button onclick="placeOrder()" style="background:var(--gold); border:none; padding:10px 20px; font-weight:bold; border-radius:5px;">🚀 Order</button>
-    </div>
+<script>
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8Zly7DTi2Zch413BxwX_7gCJerCPiFSHsgl83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv")
+.then(res => res.text())
+.then(data => {
+  document.getElementById("output").innerText = data;
+})
+.catch(err => {
+  document.getElementById("output").innerText = "Error: " + err;
+});
+</script>
 
-    <p onclick="openAdmin()" style="text-align:center; font-size:12px; color:#222; margin-top:50px;">Admin Control</p>
-
-    <div id="adminLayer">
-        <h3 style="color:var(--gold);">🛠️ Menu Control Panel</h3>
-        <input type="text" id="newCat" placeholder="Category (e.g. 🍕 Pizza)">
-        <input type="text" id="newItem" placeholder="Item Name">
-        <input type="number" id="newPrice" placeholder="Price">
-        <button onclick="saveToMenu()" style="width:100%; padding:15px; background:var(--gold); border:none; font-weight:bold;">✅ Add to Menu</button>
-        <hr>
-        <button onclick="document.getElementById('adminLayer').style.display='none'" style="width:100%; padding:10px; background:#444; color:white; border:none;">Close</button>
-    </div>
-
-    <script>
-        const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; // APNA URL YAHAN DALO
-        let cart = {};
-
-        async function loadMenu() {
-            const res = await fetch(scriptURL + "?action=getMenu");
-            const menuData = await res.json();
-            const container = document.getElementById('menu-container');
-            container.innerHTML = "";
-            for (let cat in menuData) {
-                let html = `<div class="category-header" onclick="this.nextElementSibling.classList.toggle('open')">${cat} <span>▼</span></div><div class="category-content">`;
-                menuData[cat].forEach(item => {
-                    html += `<div class="item"><span>${item.name} (₹${item.price})</span>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="qty-btn" onclick="updateQty('${item.name}', -1, ${item.price})">-</button>
-                        <span id="qty-${item.name}">0</span>
-                        <button class="qty-btn" onclick="updateQty('${item.name}', 1, ${item.price})">+</button>
-                        </div></div>`;
-                });
-                container.innerHTML += html + `</div>`;
-            }
-        }
-
-        function openAdmin() {
-            if (prompt("Enter Admin Key:") === "Google 127") {
-                document.getElementById('adminLayer').style.display = 'block';
-            }
-        }
-
-        async function saveToMenu() {
-            let cat = document.getElementById('newCat').value;
-            let item = document.getElementById('newItem').value;
-            let price = document.getElementById('newPrice').value;
-            if(!cat || !item || !price) { alert("Sari details dalo!"); return; }
-            
-            // Direct save logic to Sheet
-            alert("Saving " + item + " to " + cat + "...");
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify({action: "updateMenu", cat: cat, item: item, price: price})
-            }).then(() => { alert("Saved!"); location.reload(); });
-        }
-
-        loadMenu();
-    </script>
 </body>
 </html>
