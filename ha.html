@@ -1,210 +1,183 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Cafe Admin Panel</title>
-<style>
-body{margin:0;font-family:Arial;background:#f2f2f2;}
-header{background:#e23744;color:white;padding:15px;text-align:center;font-size:24px;font-weight:bold;}
-.container{display:flex;min-height:80vh;flex-wrap:wrap;}
-.sidebar{width:220px;background:#fff;margin:15px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:15px;flex-shrink:0;}
-.main{flex:1;margin:15px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);background:#fff;padding:15px;min-width:300px;}
-.card{padding:10px;border-radius:8px;margin-bottom:10px;background:#f8f8f8;display:flex;justify-content:space-between;align-items:center;}
-input,select,button{padding:6px;margin:5px 0;border-radius:5px;border:1px solid #ccc;}
-button{background:#e23744;color:white;border:none;cursor:pointer;margin-left:5px;}
-#successMessage{position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:10px 15px;border-radius:5px;display:none;opacity:0;transition:0.5s;}
-@media(max-width:900px){.container{flex-direction:column;}.sidebar{width:100%;}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crushers Cafe | Live Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #c5a059; --dark: #060e0a; --bg: #0b1a13; --card: #15291f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg); color: white; overflow: hidden; }
+
+        header { background: var(--dark); padding: 15px; text-align: center; border-bottom: 2px solid var(--gold); height: 80px; }
+        header h1 { color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 22px; }
+
+        .wrapper { display: flex; height: calc(100vh - 140px); }
+        .sidebar { width: 110px; background: var(--dark); border-right: 1px solid #1a3327; overflow-y: auto; }
+        .cat-btn { padding: 20px 5px; color: #888; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 11px; text-transform: uppercase; transition: 0.3s; }
+        .cat-btn.active { color: var(--gold); background: rgba(197, 160, 89, 0.1); border-left: 4px solid var(--gold); font-weight: bold; }
+
+        .content { flex: 1; padding: 15px; overflow-y: auto; background: #0d1f16; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
+        .card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; transition: 0.3s; }
+        .card:hover { border-color: var(--gold); transform: translateY(-5px); }
+        .card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+        
+        /* Auto Capitalize for Item Name */
+        .card h4 { text-transform: capitalize; font-size: 14px; margin-bottom: 5px; color: #fff; }
+        .card p { color: var(--gold); font-weight: 600; margin-bottom: 8px; }
+
+        .qty-box { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 5px; }
+        .btn-q { background: var(--gold); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; color: black; }
+
+        footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark); border-top: 1px solid var(--gold); display: flex; justify-content: space-between; padding: 0 20px; align-items: center; z-index: 500; }
+        .order-btn { background: var(--gold); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; }
+        .modal { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--gold); width: 90%; max-width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; background: #000; color: #fff; outline: none; }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
-<header>Royal Cafe Admin Panel</header>
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="color:var(--gold); font-size: 11px; letter-spacing: 1px;">CRUSHERS CAFE MENU LOADING...</p>
+    </div>
 
-<!-- Login Form -->
-<div id="loginDiv" style="max-width:400px;margin:40px auto;padding:20px;background:#fff;border-radius:10px;">
-<h3>Admin Login</h3>
-<input id="adminUser" placeholder="Username">
-<input id="adminPass" type="password" placeholder="Password">
-<button onclick="adminLogin()">Login</button>
-</div>
+    <header><h1>CRUSHERS CAFE</h1></header>
 
-<!-- Dashboard -->
-<div id="adminDashboard" style="display:none;">
-<div style="text-align:right;margin:10px;"><button onclick="adminLogout()">Logout</button></div>
-<div class="container">
-<div class="sidebar">
-<h3>Categories</h3>
-<div id="adminCategories"></div>
-<input id="newCategory" placeholder="New Category">
-<button onclick="addCategory()">Add Category</button>
+    <div class="wrapper">
+        <aside class="sidebar">
+            <div class="cat-btn active" onclick="render('all', this)">All Items</div>
+            <div class="cat-btn" onclick="render('pizza', this)">Pizza</div>
+            <div class="cat-btn" onclick="render('burger', this)">Burger</div>
+            <div class="cat-btn" onclick="render('tea', this)">Tea/Drinks</div>
+            <div class="cat-btn" onclick="render('masala', this)">Masala Special</div>
+        </aside>
+        <main class="content">
+            <div class="grid" id="menuGrid"></div>
+        </main>
+    </div>
 
-<h3>Subcategories</h3>
-<select id="selectCategoryForSubcat"></select>
-<input id="newSubcategory" placeholder="New Subcategory">
-<button onclick="addSubcategory()">Add Subcategory</button>
-</div>
+    <footer>
+        <div id="totalBill" style="font-weight: 600; color: var(--gold);">Total: ₹0</div>
+        <button class="order-btn" onclick="openModal()">Order Now</button>
+    </footer>
 
-<div class="main">
-<h3>Items</h3>
-<select id="selectCategoryForItem"></select>
-<select id="selectSubcategoryForItem"></select>
-<input id="newItemName" placeholder="Item Name">
-<input id="newItemPrice" type="number" placeholder="Price">
-<button onclick="addItem()">Add Item</button>
-<div id="adminManage"></div>
-</div>
-</div>
-</div>
+    <div id="customerModal" class="overlay">
+        <div class="modal">
+            <h3 style="color:var(--gold); margin-bottom: 15px;">Customer Details</h3>
+            <input type="text" id="custName" placeholder="Enter Your Name">
+            <input type="tel" id="custPhone" placeholder="Mobile Number">
+            <button class="order-btn" style="width:100%; margin-top: 10px;" onclick="finalWhatsApp()">Send on WhatsApp</button>
+            <p onclick="document.getElementById('customerModal').style.display='none'" style="margin-top: 15px; cursor:pointer; font-size: 12px; color: #777;">[ Close ]</p>
+        </div>
+    </div>
 
-<div id="successMessage"></div>
+    <script>
+        // Aapka updated CSV Link
+      const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8ZIy7DTi2Zch413BxwX_7gCJerCPiFSHsgI83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv";
 
-<script>
-const ADMIN_USERNAME="admin";
-const ADMIN_PASSWORD="1234";
+        let fullMenu = [];
+        let cartItems = {};
+        let grandTotal = 0;
 
-// Load menuData from localStorage or default
-let menuData = JSON.parse(localStorage.getItem("menuData")) || {Coffee:{Morning:[],Evening:[]},Tea:{Masala:[],Lemon:[]}};
+        async function startApp() {
+            try {
+                // v=Date.now() lagane se Excel ke changes turant dikhte hain
+                const response = await fetch(CSV_URL + '&v=' + Date.now());
+                const data = await response.text();
+                processData(data);
+                document.getElementById('loader').style.display = 'none';
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
 
-// Show temporary success message
-function showMessage(msg){
-  const d=document.getElementById("successMessage");
-  d.innerText=msg;
-  d.style.display="block";
-  d.style.opacity="1";
-  setTimeout(()=>{d.style.opacity="0";setTimeout(()=>{d.style.display="none";},500)},2000);
-}
+        function processData(csv) {
+            const rows = csv.split("\n").slice(1);
+            fullMenu = rows.map(row => {
+                const cols = row.split(",");
+                if(cols.length >= 3) {
+                    // First letter Capital logic
+                    let rawName = cols[0].trim().toLowerCase();
+                    let formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
-// Login function
-function adminLogin(){
-  let u=document.getElementById("adminUser").value;
-  let p=document.getElementById("adminPass").value;
-  if(u===ADMIN_USERNAME && p===ADMIN_PASSWORD){
-    document.getElementById("loginDiv").style.display="none";
-    document.getElementById("adminDashboard").style.display="block";
-    showMessage("Login Successful ✅");
-    loadDashboard();
-  } else showMessage("Invalid credentials ❌");
-}
+                    return {
+                        name: formattedName,
+                        price: parseInt(cols[1]) || 0,
+                        cat: cols[2].trim().toLowerCase(),
+                        img: (cols[3] && cols[3].trim()) || 'https://via.placeholder.com/150'
+                    };
+                }
+            }).filter(item => item);
+            render('all');
+        }
 
-// Logout
-function adminLogout(){
-  document.getElementById("loginDiv").style.display="block";
-  document.getElementById("adminDashboard").style.display="none";
-  showMessage("Logged out ✅");
-}
+        function render(category, btn = null) {
+            if(btn) {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = "";
+            fullMenu.forEach(item => {
+                if(category === 'all' || item.cat.includes(category)) {
+                    const cleanId = item.name.replace(/\s+/g, '-');
+                    grid.innerHTML += `
+                        <div class="card">
+                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/150'">
+                            <h4>${item.name}</h4>
+                            <p>₹${item.price}</p>
+                            <div class="qty-box">
+                                <button class="btn-q" onclick="changeQty('${item.name}', -1, ${item.price})">-</button>
+                                <span id="q-${cleanId}">${cartItems[item.name] || 0}</span>
+                                <button class="btn-q" onclick="changeQty('${item.name}', 1, ${item.price})">+</button>
+                            </div>
+                        </div>`;
+                }
+            });
+        }
 
-// Dashboard
-function loadDashboard(){
-  loadCategories();
-  renderManage();
-}
+        function changeQty(name, delta, price) {
+            if(!cartItems[name]) cartItems[name] = 0;
+            if(cartItems[name] + delta >= 0) {
+                cartItems[name] += delta;
+                grandTotal += (delta * price);
+                document.getElementById(`q-${name.replace(/\s+/g, '-')}`).innerText = cartItems[name];
+                document.getElementById('totalBill').innerText = "Total: ₹" + grandTotal;
+            }
+        }
 
-// Load categories in sidebar & dropdowns
-function loadCategories(){
-  const cdiv=document.getElementById("adminCategories");
-  const sCat=document.getElementById("selectCategoryForItem");
-  const sSub=document.getElementById("selectCategoryForSubcat");
-  cdiv.innerHTML=""; sCat.innerHTML=""; sSub.innerHTML="";
-  for(let cat in menuData){
-    // Sidebar
-    let div=document.createElement("div");
-    div.className="card";
-    div.innerText=cat;
-    cdiv.appendChild(div);
-    // Dropdowns
-    let opt=document.createElement("option");
-    opt.value=cat; opt.innerText=cat;
-    sCat.appendChild(opt);
-    sSub.appendChild(opt.cloneNode(true));
-  }
-  renderSubcategories(sCat.value);
-}
+        function openModal() {
+            if(grandTotal === 0) return alert("Pehle kuch select karein!");
+            document.getElementById('customerModal').style.display = 'flex';
+        }
 
-// Render subcategories for selected category
-function renderSubcategories(cat){
-  const sub=document.getElementById("selectSubcategoryForItem");
-  sub.innerHTML="";
-  if(!menuData[cat]) return;
-  for(let s in menuData[cat]){
-    let o=document.createElement("option");
-    o.value=s; o.innerText=s;
-    sub.appendChild(o);
-  }
-}
+        function finalWhatsApp() {
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            if(!name || !phone) return alert("Details bharein!");
 
-// Save to localStorage
-function saveData(){
-  localStorage.setItem("menuData", JSON.stringify(menuData));
-  showMessage("Saved ✅");
-  loadDashboard();
-}
+            const orderID = "CC-" + Math.floor(Math.random()*9000 + 1000);
+            let msg = `*CRUSHERS CAFE ORDER*%0AID: ${orderID}%0AName: ${name}%0A%0A*Items:*%0A`;
+            
+            for(let key in cartItems) {
+                if(cartItems[key] > 0) msg += `- ${key} x ${cartItems[key]}%0A`;
+            }
+            msg += `%0A*Total: ₹${grandTotal}*`;
+            
+            window.location.href = `https://wa.me/919876543210?text=${msg}`;
+        }
 
-// Add Category
-function addCategory(){
-  let n=document.getElementById("newCategory").value.trim();
-  if(!n) return showMessage("Enter category");
-  if(menuData[n]) return showMessage("Already exists");
-  menuData[n]={};
-  document.getElementById("newCategory").value="";
-  saveData();
-}
-
-// Add Subcategory
-function addSubcategory(){
-  let cat=document.getElementById("selectCategoryForSubcat").value;
-  let s=document.getElementById("newSubcategory").value.trim();
-  if(!s) return showMessage("Enter subcategory");
-  if(menuData[cat][s]) return showMessage("Already exists");
-  menuData[cat][s]=[];
-  document.getElementById("newSubcategory").value="";
-  saveData();
-}
-
-// Add Item
-function addItem(){
-  let cat=document.getElementById("selectCategoryForItem").value;
-  let sub=document.getElementById("selectSubcategoryForItem").value;
-  let n=document.getElementById("newItemName").value.trim();
-  let p=parseFloat(document.getElementById("newItemPrice").value);
-  if(!n || !p) return showMessage("Enter name & price");
-  menuData[cat][sub].push({name:n,price:p});
-  document.getElementById("newItemName").value="";
-  document.getElementById("newItemPrice").value="";
-  saveData();
-  renderManage();
-  showMessage("Item added ✅");
-}
-
-// Render all items
-function renderManage(){
-  const c=document.getElementById("adminManage");
-  c.innerHTML="";
-  for(let cat in menuData){
-    for(let sub in menuData[cat]){
-      menuData[cat][sub].forEach((item,i)=>{
-        let d=document.createElement("div");
-        d.className="card";
-        let t=document.createElement("span");
-        t.innerText=`${cat} > ${sub} > ${item.name} - ₹${item.price}`;
-        let b=document.createElement("button");
-        b.innerText="Delete";
-        b.onclick=()=>deleteItem(cat,sub,i);
-        d.appendChild(t); d.appendChild(b);
-        c.appendChild(d);
-      });
-    }
-  }
-}
-
-// Delete item
-function deleteItem(cat,sub,i){
-  if(confirm("Delete item?")){
-    menuData[cat][sub].splice(i,1);
-    saveData();
-    renderManage();
-  }
-}
-</script>
+        window.onload = startApp;
+    </script>
 </body>
 </html>
