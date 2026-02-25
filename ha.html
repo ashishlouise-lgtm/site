@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Royal Cafe Admin</title>
+<title>Royal Cafe Admin Panel</title>
 <style>
 body{margin:0;font-family:Arial;background:#f2f2f2;}
 header{background:#e23744;color:white;padding:15px;text-align:center;font-size:24px;font-weight:bold;}
@@ -21,6 +21,7 @@ button{background:#e23744;color:white;border:none;cursor:pointer;margin-left:5px
 
 <header>Royal Cafe Admin Panel</header>
 
+<!-- Login Form -->
 <div id="loginDiv" style="max-width:400px;margin:40px auto;padding:20px;background:#fff;border-radius:10px;">
 <h3>Admin Login</h3>
 <input id="adminUser" placeholder="Username">
@@ -28,6 +29,7 @@ button{background:#e23744;color:white;border:none;cursor:pointer;margin-left:5px
 <button onclick="adminLogin()">Login</button>
 </div>
 
+<!-- Dashboard -->
 <div id="adminDashboard" style="display:none;">
 <div style="text-align:right;margin:10px;"><button onclick="adminLogout()">Logout</button></div>
 <div class="container">
@@ -60,21 +62,149 @@ button{background:#e23744;color:white;border:none;cursor:pointer;margin-left:5px
 <script>
 const ADMIN_USERNAME="admin";
 const ADMIN_PASSWORD="1234";
-let menuData=JSON.parse(localStorage.getItem("menuData"))||{Coffee:[{name:"Hot Coffee",price:120}]};
 
-function showMessage(msg){const d=document.getElementById("successMessage");d.innerText=msg;d.style.display="block";d.style.opacity="1";setTimeout(()=>{d.style.opacity="0";setTimeout(()=>{d.style.display="none";},500)},2000);}
-function adminLogin(){let u=document.getElementById("adminUser").value,p=document.getElementById("adminPass").value;if(u===ADMIN_USERNAME&&p===ADMIN_PASSWORD){document.getElementById("loginDiv").style.display="none";document.getElementById("adminDashboard").style.display="block";showMessage("Login Successful ✅");loadDashboard();}else showMessage("Invalid credentials ❌");}
-function adminLogout(){document.getElementById("loginDiv").style.display="block";document.getElementById("adminDashboard").style.display="none";showMessage("Logged out ✅");}
+// Load menuData from localStorage or default
+let menuData = JSON.parse(localStorage.getItem("menuData")) || {Coffee:{Morning:[],Evening:[]},Tea:{Masala:[],Lemon:[]}};
 
-function loadDashboard(){loadCategories();renderManage();}
-function loadCategories(){const cdiv=document.getElementById("adminCategories");const sCat=document.getElementById("selectCategoryForItem");const sSub=document.getElementById("selectCategoryForSubcat");cdiv.innerHTML="";sCat.innerHTML="";sSub.innerHTML="";for(let cat in menuData){let div=document.createElement("div");div.className="card";div.innerText=cat;div.onclick=()=>renderSubcategories(cat);cdiv.appendChild(div);let opt=document.createElement("option");opt.value=cat;opt.innerText=cat;sCat.appendChild(opt);sSub.appendChild(opt.cloneNode(true));}renderSubcategories(sCat.value);}
-function renderSubcategories(cat){const sub=document.getElementById("selectSubcategoryForItem");sub.innerHTML="";if(!menuData[cat])return;for(let s in menuData[cat]){let o=document.createElement("option");o.value=s;o.innerText=s;sub.appendChild(o);}}
-function saveData(){localStorage.setItem("menuData",JSON.stringify(menuData));showMessage("Saved ✅");loadDashboard();}
-function addCategory(){let n=document.getElementById("newCategory").value.trim();if(!n)return showMessage("Enter category");if(menuData[n])return showMessage("Already exists");menuData[n]={};document.getElementById("newCategory").value="";saveData();}
-function addSubcategory(){let cat=document.getElementById("selectCategoryForSubcat").value;let s=document.getElementById("newSubcategory").value.trim();if(!s)return showMessage("Enter subcategory");if(menuData[cat][s])return showMessage("Already exists");menuData[cat][s]=[];document.getElementById("newSubcategory").value="";saveData();}
-function addItem(){let cat=document.getElementById("selectCategoryForItem").value;let sub=document.getElementById("selectSubcategoryForItem").value;let n=document.getElementById("newItemName").value.trim();let p=parseFloat(document.getElementById("newItemPrice").value);if(!n||!p)return showMessage("Enter name & price");menuData[cat][sub].push({name:n,price:p});document.getElementById("newItemName").value="";document.getElementById("newItemPrice").value="";saveData();renderManage();showMessage("Item added ✅");}
-function renderManage(){const c=document.getElementById("adminManage");c.innerHTML="";for(let cat in menuData){for(let sub in menuData[cat]){menuData[cat][sub].forEach((item,i)=>{let d=document.createElement("div");d.className="card";let t=document.createElement("span");t.innerText=`${cat} > ${sub} > ${item.name} - ₹${item.price}`;let b=document.createElement("button");b.innerText="Delete";b.onclick=()=>deleteItem(cat,sub,i);d.appendChild(t);d.appendChild(b);c.appendChild(d);});}}}
-function deleteItem(cat,sub,i){if(confirm("Delete item?")){menuData[cat][sub].splice(i,1);saveData();renderManage();}}
+// Show temporary success message
+function showMessage(msg){
+  const d=document.getElementById("successMessage");
+  d.innerText=msg;
+  d.style.display="block";
+  d.style.opacity="1";
+  setTimeout(()=>{d.style.opacity="0";setTimeout(()=>{d.style.display="none";},500)},2000);
+}
+
+// Login function
+function adminLogin(){
+  let u=document.getElementById("adminUser").value;
+  let p=document.getElementById("adminPass").value;
+  if(u===ADMIN_USERNAME && p===ADMIN_PASSWORD){
+    document.getElementById("loginDiv").style.display="none";
+    document.getElementById("adminDashboard").style.display="block";
+    showMessage("Login Successful ✅");
+    loadDashboard();
+  } else showMessage("Invalid credentials ❌");
+}
+
+// Logout
+function adminLogout(){
+  document.getElementById("loginDiv").style.display="block";
+  document.getElementById("adminDashboard").style.display="none";
+  showMessage("Logged out ✅");
+}
+
+// Dashboard
+function loadDashboard(){
+  loadCategories();
+  renderManage();
+}
+
+// Load categories in sidebar & dropdowns
+function loadCategories(){
+  const cdiv=document.getElementById("adminCategories");
+  const sCat=document.getElementById("selectCategoryForItem");
+  const sSub=document.getElementById("selectCategoryForSubcat");
+  cdiv.innerHTML=""; sCat.innerHTML=""; sSub.innerHTML="";
+  for(let cat in menuData){
+    // Sidebar
+    let div=document.createElement("div");
+    div.className="card";
+    div.innerText=cat;
+    cdiv.appendChild(div);
+    // Dropdowns
+    let opt=document.createElement("option");
+    opt.value=cat; opt.innerText=cat;
+    sCat.appendChild(opt);
+    sSub.appendChild(opt.cloneNode(true));
+  }
+  renderSubcategories(sCat.value);
+}
+
+// Render subcategories for selected category
+function renderSubcategories(cat){
+  const sub=document.getElementById("selectSubcategoryForItem");
+  sub.innerHTML="";
+  if(!menuData[cat]) return;
+  for(let s in menuData[cat]){
+    let o=document.createElement("option");
+    o.value=s; o.innerText=s;
+    sub.appendChild(o);
+  }
+}
+
+// Save to localStorage
+function saveData(){
+  localStorage.setItem("menuData", JSON.stringify(menuData));
+  showMessage("Saved ✅");
+  loadDashboard();
+}
+
+// Add Category
+function addCategory(){
+  let n=document.getElementById("newCategory").value.trim();
+  if(!n) return showMessage("Enter category");
+  if(menuData[n]) return showMessage("Already exists");
+  menuData[n]={};
+  document.getElementById("newCategory").value="";
+  saveData();
+}
+
+// Add Subcategory
+function addSubcategory(){
+  let cat=document.getElementById("selectCategoryForSubcat").value;
+  let s=document.getElementById("newSubcategory").value.trim();
+  if(!s) return showMessage("Enter subcategory");
+  if(menuData[cat][s]) return showMessage("Already exists");
+  menuData[cat][s]=[];
+  document.getElementById("newSubcategory").value="";
+  saveData();
+}
+
+// Add Item
+function addItem(){
+  let cat=document.getElementById("selectCategoryForItem").value;
+  let sub=document.getElementById("selectSubcategoryForItem").value;
+  let n=document.getElementById("newItemName").value.trim();
+  let p=parseFloat(document.getElementById("newItemPrice").value);
+  if(!n || !p) return showMessage("Enter name & price");
+  menuData[cat][sub].push({name:n,price:p});
+  document.getElementById("newItemName").value="";
+  document.getElementById("newItemPrice").value="";
+  saveData();
+  renderManage();
+  showMessage("Item added ✅");
+}
+
+// Render all items
+function renderManage(){
+  const c=document.getElementById("adminManage");
+  c.innerHTML="";
+  for(let cat in menuData){
+    for(let sub in menuData[cat]){
+      menuData[cat][sub].forEach((item,i)=>{
+        let d=document.createElement("div");
+        d.className="card";
+        let t=document.createElement("span");
+        t.innerText=`${cat} > ${sub} > ${item.name} - ₹${item.price}`;
+        let b=document.createElement("button");
+        b.innerText="Delete";
+        b.onclick=()=>deleteItem(cat,sub,i);
+        d.appendChild(t); d.appendChild(b);
+        c.appendChild(d);
+      });
+    }
+  }
+}
+
+// Delete item
+function deleteItem(cat,sub,i){
+  if(confirm("Delete item?")){
+    menuData[cat][sub].splice(i,1);
+    saveData();
+    renderManage();
+  }
+}
 </script>
 </body>
 </html>
