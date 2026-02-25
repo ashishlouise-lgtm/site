@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -12,106 +12,105 @@
 
         /* Header */
         header { background: var(--dark); padding: 15px; text-align: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 100; }
-        header h1 { color: var(--gold); letter-spacing: 2px; font-size: 22px; }
-
-        /* Admin Login Button (Hidden) */
-        #adminTrigger { position: fixed; bottom: 10px; left: 10px; opacity: 0.1; cursor: pointer; }
+        header h1 { color: var(--gold); letter-spacing: 2px; }
 
         /* Layout */
-        .main { display: flex; height: calc(100vh - 120px); }
-        .sidebar { width: 120px; background: var(--dark); border-right: 1px solid #1a3327; padding-top: 20px; }
-        .cat-btn { display: block; width: 100%; padding: 15px 5px; color: #aaa; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 13px; }
-        .cat-btn.active { color: var(--gold); font-weight: bold; background: rgba(197, 160, 89, 0.1); border-left: 3px solid var(--gold); }
+        .main { display: flex; height: calc(100vh - 150px); }
+        .sidebar { width: 100px; background: var(--dark); border-right: 1px solid #1a3327; }
+        .cat-btn { padding: 20px 5px; color: #aaa; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 12px; }
+        .cat-btn.active { color: var(--gold); background: rgba(197, 160, 89, 0.1); border-left: 3px solid var(--gold); }
 
-        .content { flex: 1; padding: 20px; overflow-y: auto; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .content { flex: 1; padding: 15px; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
 
-        /* Item Cards */
-        .card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; transition: 0.3s; }
-        .card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-        .qty-box { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px; }
-        .btn-q { background: var(--gold); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        /* Cards */
+        .card { background: var(--card); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; }
+        .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; }
+        
+        .qty-box { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; }
+        .btn-q { background: var(--gold); border: none; width: 25px; height: 25px; border-radius: 50%; cursor: pointer; font-weight: bold; }
 
-        /* Footer */
-        footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark); border-top: 1px solid var(--gold); display: flex; justify-content: space-between; padding: 0 20px; align-items: center; }
-        .order-btn { background: var(--gold); color: black; border: none; padding: 8px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
-        /* Admin Panel Modal */
-        #adminPanel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; padding: 30px; }
-        .admin-content { max-width: 500px; margin: auto; background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--gold); }
+        /* Admin Panel (Hidden by default) */
+        #adminSection { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; padding: 20px; overflow-y: auto; }
+        .admin-box { max-width: 400px; margin: auto; background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--gold); }
         input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        .close-admin { float: right; cursor: pointer; color: var(--gold); }
+
+        /* Loading & Forms */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark); border-top: 1px solid var(--gold); display: flex; justify-content: space-between; padding: 0 20px; align-items: center; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>CRUSHERS CAFE</h1>
-        <p style="font-size: 10px; color: #aaa;">Ajmer | Secure Online Ordering</p>
-    </header>
+    <header><h1>CRUSHERS CAFE</h1></header>
 
     <div class="main">
-        <aside class="sidebar">
-            <div class="cat-btn active" onclick="render('all', this)">All</div>
-            <div class="cat-btn" onclick="render('pizza', this)">Pizza</div>
-            <div class="cat-btn" onclick="render('burger', this)">Burger</div>
-            <div class="cat-btn" onclick="render('tea', this)">Tea</div>
+        <aside class="sidebar" id="cats">
+            <div class="cat-btn active" onclick="render('all')">All</div>
+            <div class="cat-btn" onclick="render('pizza')">Pizza</div>
+            <div class="cat-btn" onclick="render('burger')">Burger</div>
         </aside>
-        <main class="content">
-            <div class="grid" id="menuGrid"></div>
-        </main>
+        <main class="content"><div class="grid" id="menuGrid"></div></main>
     </div>
 
     <footer>
         <div id="bill">Total: ₹0</div>
-        <button class="order-btn" onclick="placeOrder()">Order Now</button>
+        <button onclick="openCustomerForm()" style="background:var(--gold); border:none; padding:8px 15px; border-radius:5px; font-weight:bold;">ORDER NOW</button>
     </footer>
 
-    <div id="adminTrigger" onclick="checkAuth()">ADMIN</div>
+    <div id="adminSection">
+        <div class="admin-box">
+            <h2 style="color:var(--gold)">Admin Menu Control</h2>
+            <input type="text" id="itemName" placeholder="Item Name">
+            <input type="number" id="itemPrice" placeholder="Price">
+            <select id="itemCat">
+                <option value="pizza">Pizza</option>
+                <option value="burger">Burger</option>
+            </select>
+            <input type="text" id="itemImg" placeholder="Image Link (URL)">
+            <button onclick="saveItem()" style="width:100%; background:var(--gold); padding:10px; border:none; font-weight:bold;">Save Item</button>
+            <div id="adminList" style="margin-top:20px;"></div>
+            <button onclick="closeAdmin()" style="margin-top:10px; background:none; color:white; border:none; cursor:pointer;">[ Close Admin ]</button>
+        </div>
+    </div>
 
-    <div id="adminPanel">
-        <div class="admin-content">
-            <span class="close-admin" onclick="document.getElementById('adminPanel').style.display='none'">[X] Close</span>
-            <h2 style="color: var(--gold);">Manage Menu</h2>
-            <input type="text" id="adminPass" placeholder="Enter Admin Password" style="background: #000; color: white;">
-            <div id="adminForm" style="display:none;">
-                <input type="text" id="itemName" placeholder="Item Name">
-                <input type="number" id="itemPrice" placeholder="Price">
-                <select id="itemCat">
-                    <option value="pizza">Pizza</option>
-                    <option value="burger">Burger</option>
-                    <option value="tea">Tea</option>
-                </select>
-                <input type="text" id="itemImg" placeholder="Image Link (Unsplash/Imgur)">
-                <button class="order-btn" style="width:100%" onclick="saveToMemory()">Save Item</button>
-                <hr style="margin:20px 0; border:0.5px solid #333;">
-                <div id="adminList"></div>
-            </div>
-            <button id="loginBtn" class="order-btn" style="width:100%; margin-top:10px;" onclick="verify()">Login</button>
+    <div id="loadingOverlay" class="overlay">
+        <div id="loaderUI">
+            <div class="loader"></div>
+            <p>Processing Order...</p>
+        </div>
+        <div id="formUI" class="admin-box" style="display:none;">
+            <h3>Customer Details</h3>
+            <input type="text" id="cName" placeholder="Enter Name">
+            <input type="tel" id="cPhone" placeholder="Phone Number">
+            <button onclick="finalSubmit()" style="width:100%; background:var(--gold); padding:10px; border:none; font-weight:bold;">Confirm & WhatsApp</button>
         </div>
     </div>
 
     <script>
-        let cart = {};
-        let total = 0;
-        const SECRET_KEY = "1234"; // Aapka Password
+        let cart = {}; let total = 0;
 
-        function render(cat = 'all', btn = null) {
-            if(btn) {
-                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+        // --- URL TRICK ---
+        function checkUrl() {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('admin') === 'google') {
+                document.getElementById('adminSection').style.display = 'block';
+                loadAdminItems();
             }
+        }
+
+        function render(cat='all') {
             const grid = document.getElementById('menuGrid');
             const menu = JSON.parse(localStorage.getItem('cafeMenu')) || [];
             grid.innerHTML = "";
-            
-            menu.forEach((item, index) => {
+            menu.forEach(item => {
                 if(cat === 'all' || item.cat === cat) {
-                    grid.innerHTML += `
-                    <div class="card">
-                        <img src="${item.img || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200'}">
-                        <h4>${item.name}</h4>
-                        <p>₹${item.price}</p>
+                    grid.innerHTML += `<div class="card">
+                        <img src="${item.img || 'https://via.placeholder.com/100'}">
+                        <h4>${item.name}</h4><p>₹${item.price}</p>
                         <div class="qty-box">
                             <button class="btn-q" onclick="updateQty('${item.name}', -1, ${item.price})">-</button>
                             <span id="q-${item.name.replace(/\s/g, '')}">0</span>
@@ -125,74 +124,72 @@
         function updateQty(name, delta, price) {
             if(!cart[name]) cart[name] = 0;
             if(cart[name] + delta >= 0) {
-                cart[name] += delta;
-                total += (delta * price);
+                cart[name] += delta; total += (delta * price);
                 document.getElementById(`q-${name.replace(/\s/g, '')}`).innerText = cart[name];
                 document.getElementById('bill').innerText = "Total: ₹" + total;
             }
         }
 
-        // --- Admin Logic ---
-        function checkAuth() {
-            document.getElementById('adminPanel').style.display = 'flex';
-        }
-
-        function verify() {
-            const pass = document.getElementById('adminPass').value;
-            if(pass === SECRET_KEY) {
-                document.getElementById('adminForm').style.display = 'block';
-                document.getElementById('adminPass').style.display = 'none';
-                document.getElementById('loginBtn').style.display = 'none';
-                loadAdminList();
-            } else { alert("Wrong Password!"); }
-        }
-
-        function saveToMemory() {
+        // --- Admin Functions ---
+        function saveItem() {
             const name = document.getElementById('itemName').value;
             const price = document.getElementById('itemPrice').value;
             const cat = document.getElementById('itemCat').value;
             const img = document.getElementById('itemImg').value;
-
             if(!name || !price) return;
 
             let menu = JSON.parse(localStorage.getItem('cafeMenu')) || [];
-            menu.push({ name, price, cat, img });
+            menu.push({name, price, cat, img});
             localStorage.setItem('cafeMenu', JSON.stringify(menu));
-            loadAdminList();
-            render();
-            alert("Saved!");
+            loadAdminItems(); render();
         }
 
-        function loadAdminList() {
+        function loadAdminItems() {
             let menu = JSON.parse(localStorage.getItem('cafeMenu')) || [];
             let list = document.getElementById('adminList');
-            list.innerHTML = "<h4>Live Items:</h4>";
+            list.innerHTML = "";
             menu.forEach((item, i) => {
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin:5px 0;">
                     <span>${item.name}</span>
-                    <button onclick="del(${i})" style="background:red; color:white; border:none; padding:2px 5px; border-radius:3px;">Del</button>
+                    <button onclick="del(${i})" style="color:red; background:none; border:none; cursor:pointer;">Del</button>
                 </div>`;
             });
         }
 
         function del(i) {
             let menu = JSON.parse(localStorage.getItem('cafeMenu'));
-            menu.splice(i, 1);
-            localStorage.setItem('cafeMenu', JSON.stringify(menu));
-            loadAdminList();
-            render();
+            menu.splice(i, 1); localStorage.setItem('cafeMenu', JSON.stringify(menu));
+            loadAdminItems(); render();
         }
 
-        function placeOrder() {
-            if(total === 0) return alert("Add items first!");
-            let orderID = "CC-" + Math.floor(Math.random()*9000 + 1000);
-            let msg = `*CRUSHERS CAFE - ORDER ID: ${orderID}*%0A`;
-            for(let key in cart) { if(cart[key] > 0) msg += `- ${key} x ${cart[key]}%0A`; }
-            msg += `%0A*TOTAL: ₹${total}*`;
-            window.location.href = `https://wa.me/919876543210?text=${msg}`;
+        // --- Order Functions ---
+        function openCustomerForm() {
+            if(total === 0) return alert("Items select karein!");
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('loaderUI').style.display = 'none';
+            document.getElementById('formUI').style.display = 'block';
         }
 
-        window.onload = () => render();
+        function finalSubmit() {
+            const name = document.getElementById('cName').value;
+            const phone = document.getElementById('cPhone').value;
+            if(!name || !phone) return alert("Details bharein");
+
+            document.getElementById('formUI').style.display = 'none';
+            document.getElementById('loaderUI').style.display = 'block';
+
+            setTimeout(() => {
+                let orderID = "ORD-" + Math.floor(Math.random()*9000+1000);
+                let msg = `*CRUSHERS CAFE*%0AOrder ID: ${orderID}%0AClient: ${name}%0AItems:%0A`;
+                for(let k in cart) { if(cart[k]>0) msg += `- ${k} x ${cart[k]}%0A`; }
+                msg += `%0A*Total: ₹${total}*`;
+                window.location.href = `https://wa.me/919876543210?text=${msg}`;
+            }, 2000);
+        }
+
+        function closeAdmin() { window.location.href = window.location.pathname; }
+
+        window.onload = () => { checkUrl(); render(); };
     </script>
 </body>
 </html>
