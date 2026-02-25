@@ -10,17 +10,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg); color: white; overflow: hidden; }
 
-        /* Header */
         header { background: var(--dark); padding: 15px; text-align: center; border-bottom: 2px solid var(--gold); height: 80px; }
         header h1 { color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 22px; }
 
-        /* Layout */
         .wrapper { display: flex; height: calc(100vh - 140px); }
-        .sidebar { width: 100px; background: var(--dark); border-right: 1px solid #1a3327; }
+        .sidebar { width: 110px; background: var(--dark); border-right: 1px solid #1a3327; overflow-y: auto; }
         .cat-btn { padding: 20px 5px; color: #888; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 11px; text-transform: uppercase; transition: 0.3s; }
         .cat-btn.active { color: var(--gold); background: rgba(197, 160, 89, 0.1); border-left: 4px solid var(--gold); font-weight: bold; }
 
-        /* Menu Grid */
         .content { flex: 1; padding: 15px; overflow-y: auto; background: #0d1f16; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
         .card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; transition: 0.3s; }
@@ -31,20 +28,16 @@
         .card h4 { text-transform: capitalize; font-size: 14px; margin-bottom: 5px; color: #fff; }
         .card p { color: var(--gold); font-weight: 600; margin-bottom: 8px; }
 
-        /* Qty Controls */
         .qty-box { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 5px; }
         .btn-q { background: var(--gold); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; color: black; }
 
-        /* Footer */
         footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark); border-top: 1px solid var(--gold); display: flex; justify-content: space-between; padding: 0 20px; align-items: center; z-index: 500; }
         .order-btn { background: var(--gold); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-        /* Overlay/Modal */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--gold); width: 90%; max-width: 350px; text-align: center; }
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; background: #000; color: #fff; outline: none; }
 
-        /* Startup Loader */
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -54,17 +47,18 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p style="color:var(--gold); font-size: 11px; letter-spacing: 1px;">FETCHING LIVE MENU...</p>
+        <p style="color:var(--gold); font-size: 11px; letter-spacing: 1px;">CRUSHERS CAFE MENU LOADING...</p>
     </div>
 
     <header><h1>CRUSHERS CAFE</h1></header>
 
     <div class="wrapper">
-        <aside class="sidebar" id="cat-sidebar">
-            <div class="cat-btn active" onclick="render('all', this)">All</div>
+        <aside class="sidebar">
+            <div class="cat-btn active" onclick="render('all', this)">All Items</div>
             <div class="cat-btn" onclick="render('pizza', this)">Pizza</div>
             <div class="cat-btn" onclick="render('burger', this)">Burger</div>
-            <div class="cat-btn" onclick="render('tea', this)">Tea</div>
+            <div class="cat-btn" onclick="render('tea', this)">Tea/Drinks</div>
+            <div class="cat-btn" onclick="render('masala', this)">Masala Special</div>
         </aside>
         <main class="content">
             <div class="grid" id="menuGrid"></div>
@@ -87,7 +81,7 @@
     </div>
 
     <script>
-        // --- YOUR UNIQUE GOOGLE SHEET LINK ---
+        // Aapka updated CSV Link
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8Zly7DTi2Zch413BxwX_7gCJerCPiFSHsgl83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv";
 
         let fullMenu = [];
@@ -96,12 +90,13 @@
 
         async function startApp() {
             try {
-                const response = await fetch(CSV_URL + '&cache=' + Date.now());
+                // v=Date.now() lagane se Excel ke changes turant dikhte hain
+                const response = await fetch(CSV_URL + '&v=' + Date.now());
                 const data = await response.text();
                 processData(data);
                 document.getElementById('loader').style.display = 'none';
             } catch (err) {
-                alert("Menu load nahi ho raha, link check karein!");
+                console.error("Fetch error:", err);
             }
         }
 
@@ -109,19 +104,19 @@
             const rows = csv.split("\n").slice(1);
             fullMenu = rows.map(row => {
                 const cols = row.split(",");
-                if(cols.length >= 4) {
-                    // TRICK: Capitalize First Letter Logic
+                if(cols.length >= 3) {
+                    // First letter Capital logic
                     let rawName = cols[0].trim().toLowerCase();
                     let formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
                     return {
                         name: formattedName,
-                        price: parseInt(cols[1]),
+                        price: parseInt(cols[1]) || 0,
                         cat: cols[2].trim().toLowerCase(),
-                        img: cols[3].trim()
+                        img: (cols[3] && cols[3].trim()) || 'https://via.placeholder.com/150'
                     };
                 }
-            }).filter(item => item && !isNaN(item.price));
+            }).filter(item => item);
             render('all');
         }
 
@@ -133,11 +128,11 @@
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = "";
             fullMenu.forEach(item => {
-                if(category === 'all' || item.cat === category) {
+                if(category === 'all' || item.cat.includes(category)) {
                     const cleanId = item.name.replace(/\s+/g, '-');
                     grid.innerHTML += `
                         <div class="card">
-                            <img src="${item.img || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150'">
+                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/150'">
                             <h4>${item.name}</h4>
                             <p>₹${item.price}</p>
                             <div class="qty-box">
@@ -161,22 +156,22 @@
         }
 
         function openModal() {
-            if(grandTotal === 0) return alert("Pehle kuch order karein!");
+            if(grandTotal === 0) return alert("Pehle kuch select karein!");
             document.getElementById('customerModal').style.display = 'flex';
         }
 
         function finalWhatsApp() {
             const name = document.getElementById('custName').value;
             const phone = document.getElementById('custPhone').value;
-            if(!name || !phone) return alert("Naam aur Phone Number bharein!");
+            if(!name || !phone) return alert("Details bharein!");
 
             const orderID = "CC-" + Math.floor(Math.random()*9000 + 1000);
-            let msg = `*CRUSHERS CAFE - ORDER ID: ${orderID}*%0AClient: ${name}%0A%0A*Items:*%0A`;
+            let msg = `*CRUSHERS CAFE ORDER*%0AID: ${orderID}%0AName: ${name}%0A%0A*Items:*%0A`;
             
             for(let key in cartItems) {
                 if(cartItems[key] > 0) msg += `- ${key} x ${cartItems[key]}%0A`;
             }
-            msg += `%0A*TOTAL BILL: ₹${grandTotal}*`;
+            msg += `%0A*Total: ₹${grandTotal}*`;
             
             window.location.href = `https://wa.me/919876543210?text=${msg}`;
         }
@@ -184,4 +179,4 @@
         window.onload = startApp;
     </script>
 </body>
-    </html>
+</html>
