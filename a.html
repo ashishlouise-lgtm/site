@@ -1,182 +1,211 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crushers Cafe | Live Menu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #c5a059; --dark: #060e0a; --bg: #0b1a13; --card: #15291f; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg); color: white; overflow: hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crushers Cafe</title>
 
-        header { background: var(--dark); padding: 15px; text-align: center; border-bottom: 2px solid var(--gold); height: 80px; }
-        header h1 { color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 22px; }
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#001a14,#00332a);
+  color:#f5d58c;
+}
+header{
+  text-align:center;
+  padding:18px;
+  font-size:24px;
+  letter-spacing:2px;
+  font-weight:bold;
+  border-bottom:2px solid #caa75e;
+}
+.wrapper{display:flex;min-height:75vh;}
+.sidebar{
+  width:160px;
+  border-right:1px solid #caa75e;
+}
+.sidebar button{
+  width:100%;padding:15px;background:none;border:none;
+  color:#e5c17c;text-align:left;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.sidebar button.active{
+  background:#caa75e;color:black;font-weight:bold;
+}
+.menu{
+  flex:1;padding:15px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:15px;
+}
+.card{
+  background:rgba(255,255,255,0.05);
+  padding:15px;border-radius:10px;text-align:center;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.price{margin-top:5px;font-weight:bold;color:#ffd369;}
+.add-btn{
+  margin-top:8px;padding:6px 12px;
+  background:#caa75e;border:none;border-radius:6px;
+  cursor:pointer;font-weight:bold;
+}
+.bottom-bar{
+  position:fixed;bottom:0;width:100%;
+  background:#001f1a;border-top:2px solid #caa75e;
+  display:flex;justify-content:space-between;
+  padding:12px 15px;align-items:center;
+}
+.order-btn{
+  background:#caa75e;border:none;padding:10px 20px;
+  border-radius:8px;font-weight:bold;cursor:pointer;
+}
 
-        .wrapper { display: flex; height: calc(100vh - 140px); }
-        .sidebar { width: 110px; background: var(--dark); border-right: 1px solid #1a3327; overflow-y: auto; }
-        .cat-btn { padding: 20px 5px; color: #888; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 11px; text-transform: uppercase; transition: 0.3s; }
-        .cat-btn.active { color: var(--gold); background: rgba(197, 160, 89, 0.1); border-left: 4px solid var(--gold); font-weight: bold; }
+/* Popup */
+.popup{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.6);
+  display:none;justify-content:center;align-items:center;
+}
+.popup-content{
+  background:#002a22;padding:20px;
+  border-radius:10px;width:300px;
+}
+.popup-content input{
+  width:100%;padding:8px;margin-top:10px;
+  border-radius:5px;border:none;
+}
+.popup-content button{
+  margin-top:10px;width:100%;
+  padding:8px;background:#caa75e;
+  border:none;border-radius:6px;font-weight:bold;
+}
 
-        .content { flex: 1; padding: 15px; overflow-y: auto; background: #0d1f16; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; transition: 0.3s; }
-        .card:hover { border-color: var(--gold); transform: translateY(-5px); }
-        .card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
-        
-        /* Auto Capitalize for Item Name */
-        .card h4 { text-transform: capitalize; font-size: 14px; margin-bottom: 5px; color: #fff; }
-        .card p { color: var(--gold); font-weight: 600; margin-bottom: 8px; }
-
-        .qty-box { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 5px; }
-        .btn-q { background: var(--gold); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; color: black; }
-
-        footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark); border-top: 1px solid var(--gold); display: flex; justify-content: space-between; padding: 0 20px; align-items: center; z-index: 500; }
-        .order-btn { background: var(--gold); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; }
-        .modal { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--gold); width: 90%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: none; background: #000; color: #fff; outline: none; }
-
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+@media(max-width:768px){
+  .wrapper{flex-direction:column;}
+  .sidebar{width:100%;display:flex;overflow:auto;}
+  .sidebar button{text-align:center;font-size:14px;}
+}
+</style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p style="color:var(--gold); font-size: 11px; letter-spacing: 1px;">CRUSHERS CAFE MENU LOADING...</p>
-    </div>
+<header>🔥 CRUSHERS CAFE 🔥</header>
 
-    <header><h1>CRUSHERS CAFE</h1></header>
+<div class="wrapper">
+  <div class="sidebar" id="categoryBar"></div>
+  <div class="menu" id="menu"></div>
+</div>
 
-    <div class="wrapper">
-        <aside class="sidebar">
-            <div class="cat-btn active" onclick="render('all', this)">All Items</div>
-            <div class="cat-btn" onclick="render('pizza', this)">Pizza</div>
-            <div class="cat-btn" onclick="render('burger', this)">Burger</div>
-            <div class="cat-btn" onclick="render('tea', this)">Tea/Drinks</div>
-            <div class="cat-btn" onclick="render('masala', this)">Masala Special</div>
-        </aside>
-        <main class="content">
-            <div class="grid" id="menuGrid"></div>
-        </main>
-    </div>
+<div class="bottom-bar">
+  <div><strong id="total">Total: ₹0</strong></div>
+  <button class="order-btn" onclick="openPopup()">Order Now</button>
+</div>
 
-    <footer>
-        <div id="totalBill" style="font-weight: 600; color: var(--gold);">Total: ₹0</div>
-        <button class="order-btn" onclick="openModal()">Order Now</button>
-    </footer>
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3>Enter Details</h3>
+    <input id="custName" placeholder="Your Name">
+    <input id="custPhone" placeholder="Phone Number">
+    <button onclick="sendOrder()">Confirm Order</button>
+  </div>
+</div>
 
-    <div id="customerModal" class="overlay">
-        <div class="modal">
-            <h3 style="color:var(--gold); margin-bottom: 15px;">Customer Details</h3>
-            <input type="text" id="custName" placeholder="Enter Your Name">
-            <input type="tel" id="custPhone" placeholder="Mobile Number">
-            <button class="order-btn" style="width:100%; margin-top: 10px;" onclick="finalWhatsApp()">Send on WhatsApp</button>
-            <p onclick="document.getElementById('customerModal').style.display='none'" style="margin-top: 15px; cursor:pointer; font-size: 12px; color: #777;">[ Close ]</p>
-        </div>
-    </div>
+<script>
+const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8Zly7DTi2Zch413BxwX_7gCJerCPiFSHsgl83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv";
+const WHATSAPP_NUMBER="918078619566"; // change to your number
 
-    <script>
-        // Aapka updated CSV Link
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8Zly7DTi2Zch413BxwX_7gCJerCPiFSHsgl83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv";
+let menuData={},currentCategory="",cart=[];
 
-        let fullMenu = [];
-        let cartItems = {};
-        let grandTotal = 0;
+function parseCSV(csv){
+  let lines=csv.trim().split("\n");
+  let result={};
+  for(let i=1;i<lines.length;i++){
+    let row=lines[i].split(",");
+    if(row.length<4) continue;
+    let cat=row[0].trim();
+    let item=row[2].trim();
+    let price=parseFloat(row[3]);
+    if(!result[cat]) result[cat]=[];
+    result[cat].push({name:item,price});
+  }
+  return result;
+}
 
-        async function startApp() {
-            try {
-                // v=Date.now() lagane se Excel ke changes turant dikhte hain
-                const response = await fetch(CSV_URL + '&v=' + Date.now());
-                const data = await response.text();
-                processData(data);
-                document.getElementById('loader').style.display = 'none';
-            } catch (err) {
-                console.error("Fetch error:", err);
-            }
-        }
+fetch(sheetURL)
+.then(res=>res.text())
+.then(csv=>{
+  menuData=parseCSV(csv);
+  currentCategory=Object.keys(menuData)[0];
+  loadCategories();
+  loadMenu();
+});
 
-        function processData(csv) {
-            const rows = csv.split("\n").slice(1);
-            fullMenu = rows.map(row => {
-                const cols = row.split(",");
-                if(cols.length >= 3) {
-                    // First letter Capital logic
-                    let rawName = cols[0].trim().toLowerCase();
-                    let formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+function loadCategories(){
+  let html="";
+  for(let cat in menuData){
+    html+=`<button onclick="showCategory('${cat}')">${cat}</button>`;
+  }
+  document.getElementById("categoryBar").innerHTML=html;
+}
 
-                    return {
-                        name: formattedName,
-                        price: parseInt(cols[1]) || 0,
-                        cat: cols[2].trim().toLowerCase(),
-                        img: (cols[3] && cols[3].trim()) || 'https://via.placeholder.com/150'
-                    };
-                }
-            }).filter(item => item);
-            render('all');
-        }
+function showCategory(cat){
+  currentCategory=cat;
+  loadMenu();
+}
 
-        function render(category, btn = null) {
-            if(btn) {
-                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-            const grid = document.getElementById('menuGrid');
-            grid.innerHTML = "";
-            fullMenu.forEach(item => {
-                if(category === 'all' || item.cat.includes(category)) {
-                    const cleanId = item.name.replace(/\s+/g, '-');
-                    grid.innerHTML += `
-                        <div class="card">
-                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/150'">
-                            <h4>${item.name}</h4>
-                            <p>₹${item.price}</p>
-                            <div class="qty-box">
-                                <button class="btn-q" onclick="changeQty('${item.name}', -1, ${item.price})">-</button>
-                                <span id="q-${cleanId}">${cartItems[item.name] || 0}</span>
-                                <button class="btn-q" onclick="changeQty('${item.name}', 1, ${item.price})">+</button>
-                            </div>
-                        </div>`;
-                }
-            });
-        }
+function loadMenu(){
+  let items=menuData[currentCategory]||[];
+  let html="";
+  items.forEach((item,i)=>{
+    html+=`
+    <div class="card">
+      <h4>${item.name}</h4>
+      <div class="price">₹${item.price}</div>
+      <button class="add-btn" onclick="addToCart(${i})">Add</button>
+    </div>`;
+  });
+  document.getElementById("menu").innerHTML=html;
+}
 
-        function changeQty(name, delta, price) {
-            if(!cartItems[name]) cartItems[name] = 0;
-            if(cartItems[name] + delta >= 0) {
-                cartItems[name] += delta;
-                grandTotal += (delta * price);
-                document.getElementById(`q-${name.replace(/\s+/g, '-')}`).innerText = cartItems[name];
-                document.getElementById('totalBill').innerText = "Total: ₹" + grandTotal;
-            }
-        }
+function addToCart(i){
+  let item=menuData[currentCategory][i];
+  let existing=cart.find(x=>x.name===item.name);
+  if(existing) existing.qty++;
+  else cart.push({...item,qty:1});
+  updateCart();
+}
 
-        function openModal() {
-            if(grandTotal === 0) return alert("Pehle kuch select karein!");
-            document.getElementById('customerModal').style.display = 'flex';
-        }
+function updateCart(){
+  let total=0;
+  cart.forEach(item=>total+=item.price*item.qty);
+  document.getElementById("total").innerText="Total: ₹"+total;
+}
 
-        function finalWhatsApp() {
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            if(!name || !phone) return alert("Details bharein!");
+function openPopup(){
+  if(cart.length===0){alert("Cart empty!");return;}
+  document.getElementById("popup").style.display="flex";
+}
 
-            const orderID = "CC-" + Math.floor(Math.random()*9000 + 1000);
-            let msg = `*CRUSHERS CAFE ORDER*%0AID: ${orderID}%0AName: ${name}%0A%0A*Items:*%0A`;
-            
-            for(let key in cartItems) {
-                if(cartItems[key] > 0) msg += `- ${key} x ${cartItems[key]}%0A`;
-            }
-            msg += `%0A*Total: ₹${grandTotal}*`;
-            
-            window.location.href = `https://wa.me/919876543210?text=${msg}`;
-        }
+function sendOrder(){
+  let name=document.getElementById("custName").value;
+  let phone=document.getElementById("custPhone").value;
+  if(!name||!phone){alert("Fill details");return;}
 
-        window.onload = startApp;
-    </script>
+  let orderText="Order from Crushers Cafe\n";
+  let total=0;
+  cart.forEach(item=>{
+    total+=item.price*item.qty;
+    orderText+=`${item.name} x ${item.qty}\n`;
+  });
+  orderText+=`Total: ₹${total}\nName: ${name}\nPhone: ${phone}`;
+
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderText)}`);
+  cart=[];
+  updateCart();
+  document.getElementById("popup").style.display="none";
+}
+</script>
+
 </body>
 </html>
