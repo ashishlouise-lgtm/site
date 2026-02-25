@@ -1,10 +1,9 @@
-
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crushers Cafe | Live Menu</title>
+    <title>Crushers Cafe | Dynamic Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #c5a059; --dark: #060e0a; --bg: #0b1a13; --card: #15291f; }
@@ -15,25 +14,26 @@
         header h1 { color: var(--gold); letter-spacing: 2px; text-transform: uppercase; font-size: 22px; }
 
         .wrapper { display: flex; height: calc(100vh - 140px); }
-        .sidebar { width: 110px; background: var(--dark); border-right: 1px solid #1a3327; overflow-y: auto; }
-        .cat-btn { padding: 20px 5px; color: #888; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 11px; text-transform: uppercase; transition: 0.3s; }
+        .sidebar { width: 110px; background: var(--dark); border-right: 1px solid #1a3327; overflow-y: auto; scrollbar-width: none; }
+        .sidebar::-webkit-scrollbar { display: none; }
+        
+        .cat-btn { padding: 18px 5px; color: #888; text-align: center; cursor: pointer; border-bottom: 1px solid #1a3327; font-size: 11px; text-transform: uppercase; transition: 0.3s; word-wrap: break-word; }
         .cat-btn.active { color: var(--gold); background: rgba(197, 160, 89, 0.1); border-left: 4px solid var(--gold); font-weight: bold; }
 
         .content { flex: 1; padding: 15px; overflow-y: auto; background: #0d1f16; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; transition: 0.3s; }
-        .card:hover { border-color: var(--gold); transform: translateY(-5px); }
-        .card img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+        .subcat-header { width: 100%; color: var(--gold); font-size: 14px; font-weight: 600; margin: 15px 0 10px 0; border-bottom: 1px dashed rgba(197, 160, 89, 0.3); padding-bottom: 4px; text-transform: capitalize; letter-spacing: 1px; }
         
-        /* Auto Capitalize for Item Name */
-        .card h4 { text-transform: capitalize; font-size: 14px; margin-bottom: 5px; color: #fff; }
-        .card p { color: var(--gold); font-weight: 600; margin-bottom: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .card { background: var(--card); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #1a3327; }
+        .card img { width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; }
+        .card h4 { text-transform: capitalize; font-size: 13px; margin-bottom: 4px; color: #fff; }
+        .card p { color: var(--gold); font-weight: 600; font-size: 14px; margin-bottom: 8px; }
 
-        .qty-box { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 5px; }
-        .btn-q { background: var(--gold); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; color: black; }
+        .qty-box { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-q { background: var(--gold); border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-weight: bold; color: black; }
 
         footer { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--dark); border-top: 1px solid var(--gold); display: flex; justify-content: space-between; padding: 0 20px; align-items: center; z-index: 500; }
-        .order-btn { background: var(--gold); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .order-btn { background: var(--gold); color: black; border: none; padding: 10px 18px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; }
         .modal { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--gold); width: 90%; max-width: 350px; text-align: center; }
@@ -48,22 +48,14 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p style="color:var(--gold); font-size: 11px; letter-spacing: 1px;">CRUSHERS CAFE MENU LOADING...</p>
+        <p style="color:var(--gold); font-size: 10px; letter-spacing: 1px;">CRUSHERS CAFE LOADING...</p>
     </div>
 
     <header><h1>CRUSHERS CAFE</h1></header>
 
     <div class="wrapper">
-        <aside class="sidebar">
-            <div class="cat-btn active" onclick="render('all', this)">All Items</div>
-            <div class="cat-btn" onclick="render('pizza', this)">Pizza</div>
-            <div class="cat-btn" onclick="render('burger', this)">Burger</div>
-            <div class="cat-btn" onclick="render('tea', this)">Tea/Drinks</div>
-            <div class="cat-btn" onclick="render('masala', this)">Masala Special</div>
-        </aside>
-        <main class="content">
-            <div class="grid" id="menuGrid"></div>
-        </main>
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="content" id="menuArea"></main>
     </div>
 
     <footer>
@@ -82,22 +74,21 @@
     </div>
 
     <script>
-        // Aapka updated CSV Link
-      const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8ZIy7DTi2Zch413BxwX_7gCJerCPiFSHsgI83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv";
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbqnHX8ZIy7DTi2Zch413BxwX_7gCJerCPiFSHsgI83UTyOH137c2sMQJcKqelxFaPSvEGiN7oapwk/pub?gid=0&single=true&output=csv";
 
         let fullMenu = [];
+        let categories = [];
         let cartItems = {};
         let grandTotal = 0;
 
         async function startApp() {
             try {
-                // v=Date.now() lagane se Excel ke changes turant dikhte hain
                 const response = await fetch(CSV_URL + '&v=' + Date.now());
                 const data = await response.text();
                 processData(data);
                 document.getElementById('loader').style.display = 'none';
             } catch (err) {
-                console.error("Fetch error:", err);
+                console.error("Link error");
             }
         }
 
@@ -105,20 +96,33 @@
             const rows = csv.split("\n").slice(1);
             fullMenu = rows.map(row => {
                 const cols = row.split(",");
-                if(cols.length >= 3) {
-                    // First letter Capital logic
+                if(cols.length >= 4) {
                     let rawName = cols[0].trim().toLowerCase();
                     let formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
                     return {
                         name: formattedName,
                         price: parseInt(cols[1]) || 0,
-                        cat: cols[2].trim().toLowerCase(),
-                        img: (cols[3] && cols[3].trim()) || 'https://via.placeholder.com/150'
+                        category: cols[2].trim().toLowerCase(),
+                        subcategory: cols[3].trim().toLowerCase(),
+                        img: (cols[4] && cols[4].trim()) || 'https://via.placeholder.com/150'
                     };
                 }
             }).filter(item => item);
+
+            // AUTO-GENERATE CATEGORIES
+            categories = ['all', ...new Set(fullMenu.map(item => item.category))];
+            createSidebar();
             render('all');
+        }
+
+        function createSidebar() {
+            const sb = document.getElementById('sidebar');
+            sb.innerHTML = "";
+            categories.forEach(cat => {
+                let activeClass = cat === 'all' ? 'active' : '';
+                sb.innerHTML += `<div class="cat-btn ${activeClass}" onclick="render('${cat}', this)">${cat}</div>`;
+            });
         }
 
         function render(category, btn = null) {
@@ -126,10 +130,26 @@
                 document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             }
-            const grid = document.getElementById('menuGrid');
-            grid.innerHTML = "";
-            fullMenu.forEach(item => {
-                if(category === 'all' || item.cat.includes(category)) {
+            
+            const area = document.getElementById('menuArea');
+            area.innerHTML = "";
+
+            let filtered = category === 'all' ? fullMenu : fullMenu.filter(i => i.category === category);
+
+            // Grouping items by Subcategory
+            let grouped = filtered.reduce((acc, obj) => {
+                let key = obj.subcategory || "Other";
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(obj);
+                return acc;
+            }, {});
+
+            for (let subcat in grouped) {
+                area.innerHTML += `<div class="subcat-header">${subcat}</div>`;
+                let grid = document.createElement('div');
+                grid.className = "grid";
+                
+                grouped[subcat].forEach(item => {
                     const cleanId = item.name.replace(/\s+/g, '-');
                     grid.innerHTML += `
                         <div class="card">
@@ -142,8 +162,9 @@
                                 <button class="btn-q" onclick="changeQty('${item.name}', 1, ${item.price})">+</button>
                             </div>
                         </div>`;
-                }
-            });
+                });
+                area.appendChild(grid);
+            }
         }
 
         function changeQty(name, delta, price) {
@@ -166,18 +187,15 @@
             const phone = document.getElementById('custPhone').value;
             if(!name || !phone) return alert("Details bharein!");
 
-            const orderID = "CC-" + Math.floor(Math.random()*9000 + 1000);
-            let msg = `*CRUSHERS CAFE ORDER*%0AID: ${orderID}%0AName: ${name}%0A%0A*Items:*%0A`;
-            
+            let msg = `*CRUSHERS CAFE ORDER*%0AClient: ${name}%0A%0A*Items:*%0A`;
             for(let key in cartItems) {
                 if(cartItems[key] > 0) msg += `- ${key} x ${cartItems[key]}%0A`;
             }
             msg += `%0A*Total: ₹${grandTotal}*`;
-            
             window.location.href = `https://wa.me/919876543210?text=${msg}`;
         }
 
         window.onload = startApp;
     </script>
 </body>
-</html>
+</html>              
