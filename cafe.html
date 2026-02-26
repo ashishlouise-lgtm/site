@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Crushers Cafe Admin</title>
+    <style>
+        body { background: #060e0a; color: white; font-family: sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .form-box { background: #15291f; padding: 20px; border-radius: 12px; border: 1px solid #c5a059; margin-bottom: 30px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #1a3327; color: white; border-radius: 5px; }
+        button { background: #c5a059; color: black; font-weight: bold; padding: 12px; border: none; width: 100%; cursor: pointer; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #1a3327; text-align: left; font-size: 14px; }
+        th { background: #0d1f16; color: #c5a059; }
+        .edit-btn { background: #2196F3; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; border:none; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="loginSec">
+    <h2 style="text-align:center; color:#c5a059;">ADMIN LOGIN</h2>
+    <input type="password" id="mainPass" placeholder="Enter Master Password">
+    <button onclick="checkAccess()">UNLOCK DASHBOARD</button>
+</div>
+
+<div class="container" id="adminDashboard" style="display:none;">
+    <h1 style="color:#c5a059; text-align:center;">CRUSHERS CAFE ADMIN</h1>
+    
+    <div class="form-box">
+        <h3 id="formTitle">Add New Item</h3>
+        <input type="hidden" id="editRowId">
+        <input type="text" id="name" placeholder="Item Name">
+        <input type="number" id="price" placeholder="Price">
+        <input type="text" id="cat" placeholder="Category (e.g. Burger)">
+        <input type="text" id="sub" placeholder="Subcategory (e.g. Masala)">
+        <input type="text" id="img" placeholder="Image URL Link">
+        <button id="mainBtn" onclick="saveData()">SAVE TO EXCEL</button>
+        <button id="cancelBtn" onclick="resetForm()" style="display:none; background:#444; margin-top:10px;">CANCEL EDIT</button>
+    </div>
+
+    <h3>Live Menu List (From Excel)</h3>
+    <table id="menuTable">
+        <thead>
+            <tr><th>Name</th><th>Price</th><th>Category</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycWz1k6iJO-PXCGMpmhBl5PAc-iQsS8TvQqBsdQNlnYgzmMZGKnaEMS83e3wX-1h2GBA/exec";
+    let menuData = [];
+
+    function checkAccess() {
+        if(document.getElementById('mainPass').value === "Vijay@2026") {
+            document.getElementById('loginSec').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            loadTable();
+        } else { alert("Ghalat Password!"); }
+    }
+
+    async function loadTable() {
+        const res = await fetch(SCRIPT_URL);
+        menuData = await res.json();
+        const tbody = document.querySelector("#menuTable tbody");
+        tbody.innerHTML = "";
+        menuData.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.name}</td>
+                <td>₹${item.price}</td>
+                <td>${item.cat}</td>
+                <td><button class="edit-btn" onclick="editItem(${item.id})">Edit</button></td>
+            </tr>`;
+        });
+    }
+
+    function editItem(id) {
+        const item = menuData.find(i => i.id === id);
+        document.getElementById('editRowId').value = id;
+        document.getElementById('name').value = item.name;
+        document.getElementById('price').value = item.price;
+        document.getElementById('cat').value = item.cat;
+        document.getElementById('sub').value = item.sub;
+        document.getElementById('img').value = item.img;
+        
+        document.getElementById('formTitle').innerText = "Update Item: " + item.name;
+        document.getElementById('mainBtn').innerText = "UPDATE IN EXCEL";
+        document.getElementById('cancelBtn').style.display = "block";
+    }
+
+    async function saveData() {
+        const id = document.getElementById('editRowId').value;
+        const payload = {
+            action: id ? "update" : "add",
+            id: id,
+            name: document.getElementById('name').value,
+            price: document.getElementById('price').value,
+            category: document.getElementById('cat').value,
+            subcategory: document.getElementById('sub').value,
+            image: document.getElementById('img').value,
+            pass: "Vijay@2026"
+        };
+
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        alert("Success!");
+        resetForm();
+        loadTable();
+    }
+
+    function resetForm() {
+        document.getElementById('editRowId').value = "";
+        document.querySelectorAll('input').forEach(i => i.value = "");
+        document.getElementById('formTitle').innerText = "Add New Item";
+        document.getElementById('mainBtn').innerText = "SAVE TO EXCEL";
+        document.getElementById('cancelBtn').style.display = "none";
+    }
+</script>
+</body>
+</html>
