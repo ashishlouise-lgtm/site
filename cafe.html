@@ -1,119 +1,174 @@
-<!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Crushers Cafe Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crushers Admin | Zomato Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Okra:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #060e0a; color: white; font-family: sans-serif; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        .form-box { background: #15291f; padding: 20px; border-radius: 12px; border: 1px solid #c5a059; margin-bottom: 30px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #1a3327; color: white; border-radius: 5px; }
-        button { background: #c5a059; color: black; font-weight: bold; padding: 12px; border: none; width: 100%; cursor: pointer; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #1a3327; text-align: left; font-size: 14px; }
-        th { background: #0d1f16; color: #c5a059; }
-        .edit-btn { background: #2196F3; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; border:none; }
+        :root { --zomato-red: #E23744; --dark-bg: #0F172A; --card-bg: #1E293B; --gold: #F59E0B; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Okra', sans-serif; }
+        body { background: var(--dark-bg); color: #fff; padding-bottom: 50px; }
+
+        /* Login Screen */
+        #loginSec { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #2D1B1E 0%, #0F172A 100%); }
+        .login-card { background: var(--card-bg); padding: 40px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Dashboard Header */
+        header { background: var(--card-bg); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .logo { color: var(--zomato-red); font-weight: 800; font-size: 24px; letter-spacing: -1px; }
+
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        
+        /* Stats Cards */
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: linear-gradient(135deg, #1E293B 0%, #334155 100%); padding: 20px; border-radius: 16px; border-left: 4px solid var(--zomato-red); }
+
+        /* Form Styling */
+        .form-container { background: var(--card-bg); padding: 25px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; background: #0F172A; border: 1px solid #334155; color: white; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--zomato-red); box-shadow: 0 0 10px rgba(226, 55, 68, 0.2); }
+        
+        .btn-main { background: var(--zomato-red); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* Item List */
+        .item-list { display: grid; gap: 12px; }
+        .item-row { background: var(--card-bg); padding: 15px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); }
+        .item-info h4 { font-size: 16px; color: #fff; }
+        .item-info p { font-size: 13px; color: #94A3B8; }
+        .price-tag { color: var(--gold); font-weight: 700; }
+        .edit-badge { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; color: #CBD5E1; }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-bg); z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; }
     </style>
 </head>
 <body>
 
-<div class="container" id="loginSec">
-    <h2 style="text-align:center; color:#c5a059;">ADMIN LOGIN</h2>
-    <input type="password" id="mainPass" placeholder="Enter Master Password">
-    <button onclick="checkAccess()">UNLOCK DASHBOARD</button>
-</div>
+    <div id="loader"><div style="border:3px solid #334155; border-top:3px solid var(--zomato-red); width:40px; height:40px; border-radius:50%; animation:spin 1s linear infinite;"></div></div>
 
-<div class="container" id="adminDashboard" style="display:none;">
-    <h1 style="color:#c5a059; text-align:center;">CRUSHERS CAFE ADMIN</h1>
-    
-    <div class="form-box">
-        <h3 id="formTitle">Add New Item</h3>
-        <input type="hidden" id="editRowId">
-        <input type="text" id="name" placeholder="Item Name">
-        <input type="number" id="price" placeholder="Price">
-        <input type="text" id="cat" placeholder="Category (e.g. Burger)">
-        <input type="text" id="sub" placeholder="Subcategory (e.g. Masala)">
-        <input type="text" id="img" placeholder="Image URL Link">
-        <button id="mainBtn" onclick="saveData()">SAVE TO EXCEL</button>
-        <button id="cancelBtn" onclick="resetForm()" style="display:none; background:#444; margin-top:10px;">CANCEL EDIT</button>
-    </div>
+    <section id="loginSec">
+        <div class="login-card">
+            <h1 style="color:var(--zomato-red); margin-bottom:10px;">Crushers Pro</h1>
+            <p style="color:#94A3B8; margin-bottom:30px;">Partner Dashboard Login</p>
+            <input type="password" id="mainPass" placeholder="Enter Secure Code" style="text-align:center; letter-spacing:4px;">
+            <button class="btn-main" onclick="checkAccess()">LOG IN</button>
+        </div>
+    </section>
 
-    <h3>Live Menu List (From Excel)</h3>
-    <table id="menuTable">
-        <thead>
-            <tr><th>Name</th><th>Price</th><th>Category</th><th>Action</th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
+    <section id="adminDashboard" style="display:none;">
+        <header>
+            <div class="logo">CRUSHERS.</div>
+            <div style="font-size:12px; color:#94A3B8;">Ajmer, RJ</div>
+        </header>
 
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycWz1k6iJO-PXCGMpmhBl5PAc-iQsS8TvQqBsdQNlnYgzmMZGKnaEMS83e3wX-1h2GBA/exec";
-    let menuData = [];
+        <div class="container">
+            <div class="stats">
+                <div class="stat-card">
+                    <p style="font-size:12px; color:#94A3B8;">Live Items</p>
+                    <h2 id="countItems">0</h2>
+                </div>
+                <div class="stat-card" style="border-left-color:var(--gold);">
+                    <p style="font-size:12px; color:#94A3B8;">Menu Status</p>
+                    <h2 style="color:var(--gold); font-size:18px;">ACTIVE</h2>
+                </div>
+            </div>
 
-    function checkAccess() {
-        if(document.getElementById('mainPass').value ==="Vijay@2026") {
-            document.getElementById('loginSec').style.display = 'none';
-            document.getElementById('adminDashboard').style.display = 'block';
+            <div class="form-container">
+                <h3 id="formTitle" style="margin-bottom:15px;">Add New Dish</h3>
+                <input type="hidden" id="editRowId">
+                <input type="text" id="name" placeholder="Dish Name (e.g. Cheese Pizza)">
+                <input type="number" id="price" placeholder="Price in ₹">
+                <input type="text" id="cat" placeholder="Category (Burger, Pizza...)">
+                <input type="text" id="sub" placeholder="Sub-category (Small, Large...)">
+                <input type="text" id="img" placeholder="Image URL Link">
+                <button class="btn-main" id="mainBtn" onclick="saveData()">PUBLISH TO MENU</button>
+                <p id="cancelBtn" onclick="resetForm()" style="display:none; text-align:center; margin-top:15px; color:var(--zomato-red); cursor:pointer; font-size:14px;">Cancel Editing</p>
+            </div>
+
+            <h3 style="margin-bottom:15px; color:#94A3B8;">Current Menu Items</h3>
+            <div class="item-list" id="menuRows">
+                </div>
+        </div>
+    </section>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycWz1k6iJO-PXCGMpmhBl5PAc-iQsS8TvQqBsdQNlnYgzmMZGKnaEMS83e3wX-1h2GBA/exec"; // Paste your Web App URL
+        let menuData = [];
+
+        function checkAccess() {
+            if(document.getElementById('mainPass').value === "Vijay@2026") { //
+                document.getElementById('loginSec').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadTable();
+            } else { alert("Access Denied! ❌"); }
+        }
+
+        async function loadTable() {
+            document.getElementById('loader').style.display = 'flex';
+            const res = await fetch(SCRIPT_URL);
+            menuData = await res.json();
+            const list = document.getElementById('menuRows');
+            list.innerHTML = "";
+            document.getElementById('countItems').innerText = menuData.length;
+
+            menuData.forEach(item => {
+                list.innerHTML += `
+                    <div class="item-row">
+                        <div class="item-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.cat} • ${item.sub}</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="price-tag">₹${item.price}</div>
+                            <div class="edit-badge" onclick="editItem(${item.id})">Edit</div>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function editItem(id) {
+            const item = menuData.find(i => i.id === id);
+            document.getElementById('editRowId').value = id;
+            document.getElementById('name').value = item.name;
+            document.getElementById('price').value = item.price;
+            document.getElementById('cat').value = item.cat;
+            document.getElementById('sub').value = item.sub;
+            document.getElementById('img').value = item.img;
+            
+            document.getElementById('formTitle').innerText = "Edit: " + item.name;
+            document.getElementById('mainBtn').innerText = "UPDATE CHANGES";
+            document.getElementById('cancelBtn').style.display = "block";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        async function saveData() {
+            const id = document.getElementById('editRowId').value;
+            const payload = {
+                action: id ? "update" : "add",
+                id: id,
+                name: document.getElementById('name').value,
+                price: document.getElementById('price').value,
+                category: document.getElementById('cat').value,
+                subcategory: document.getElementById('sub').value,
+                image: document.getElementById('img').value,
+                pass: "Vijay@2026" //
+            };
+
+            document.getElementById('loader').style.display = 'flex';
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            resetForm();
             loadTable();
-        } else { alert("Ghalat Password!"); }
-    }
+        }
 
-    async function loadTable() {
-        const res = await fetch(SCRIPT_URL);
-        menuData = await res.json();
-        const tbody = document.querySelector("#menuTable tbody");
-        tbody.innerHTML = "";
-        menuData.forEach(item => {
-            tbody.innerHTML += `<tr>
-                <td>${item.name}</td>
-                <td>₹${item.price}</td>
-                <td>${item.cat}</td>
-                <td><button class="edit-btn" onclick="editItem(${item.id})">Edit</button></td>
-            </tr>`;
-        });
-    }
-
-    function editItem(id) {
-        const item = menuData.find(i => i.id === id);
-        document.getElementById('editRowId').value = id;
-        document.getElementById('name').value = item.name;
-        document.getElementById('price').value = item.price;
-        document.getElementById('cat').value = item.cat;
-        document.getElementById('sub').value = item.sub;
-        document.getElementById('img').value = item.img;
-        
-        document.getElementById('formTitle').innerText = "Update Item: " + item.name;
-        document.getElementById('mainBtn').innerText = "UPDATE IN EXCEL";
-        document.getElementById('cancelBtn').style.display = "block";
-    }
-
-    async function saveData() {
-        const id = document.getElementById('editRowId').value;
-        const payload = {
-            action: id ? "update" : "add",
-            id: id,
-            name: document.getElementById('name').value,
-            price: document.getElementById('price').value,
-            category: document.getElementById('cat').value,
-            subcategory: document.getElementById('sub').value,
-            image: document.getElementById('img').value,
-            pass: "Vijay@2026"
-        };
-
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        alert("Success!");
-        resetForm();
-        loadTable();
-    }
-
-    function resetForm() {
-        document.getElementById('editRowId').value = "";
-        document.querySelectorAll('input').forEach(i => i.value = "");
-        document.getElementById('formTitle').innerText = "Add New Item";
-        document.getElementById('mainBtn').innerText = "SAVE TO EXCEL";
-        document.getElementById('cancelBtn').style.display = "none";
-    }
-</script>
+        function resetForm() {
+            document.getElementById('editRowId').value = "";
+            document.querySelectorAll('input').forEach(i => i.value = "");
+            document.getElementById('formTitle').innerText = "Add New Dish";
+            document.getElementById('mainBtn').innerText = "PUBLISH TO MENU";
+            document.getElementById('cancelBtn').style.display = "none";
+        }
+    </script>
 </body>
 </html>
